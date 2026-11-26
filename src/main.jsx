@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { createRoot } from "react-dom/client";
 import {
   HashRouter,
   Routes,
@@ -1028,7 +1029,7 @@ function Admin() {
             <button
               onClick={() =>
                 sendNotification(
-                  "WE ARE ARRIVED",
+                  "WE ARE ARRIVED", 
                   "We are arrived."
                 )
               }
@@ -1198,3 +1199,7 @@ function App() {
 }
 
 export default App;
+
+import { createRoot } from "react-dom/client";
+
+createRoot(document.getElementById("root")).render(<App />);
