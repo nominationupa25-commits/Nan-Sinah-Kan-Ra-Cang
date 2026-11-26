@@ -81,6 +81,12 @@ function AdminLogin() {
         <h1>NAN SINAH KAN RA CANG</h1>
         <h2>DRIVER LOGIN</h2>
 
+        {!isSupabaseConfigured && (
+          <div className="error-box">
+            Supabase is not configured.
+          </div>
+        )}
+
         <form onSubmit={login}>
           <input
             type="email"
@@ -220,17 +226,12 @@ function PublicView() {
     };
   }, []);
 
-  const currentStop = stops.find(
-    (stop) =>
-      stop.status === "current" ||
-      stop.status === "coming" ||
-      stop.status === "arrived"
+  const currentStop = stops.find((stop) =>
+    ["current", "coming", "arrived"].includes(stop.status)
   );
 
-  const nextStop = stops.find(
-    (stop) =>
-      stop.status === "next" ||
-      stop.status === "pending"
+  const nextStop = stops.find((stop) =>
+    ["next", "pending"].includes(stop.status)
   );
 
   if (loading) {
@@ -245,8 +246,13 @@ function PublicView() {
     <div className="public-page">
       <header className="public-header">
         <div>
-          <div className="public-brand">NAN SINAH KAN RA CANG</div>
-          <div className="public-subtitle">PUBLIC VIEW</div>
+          <div className="public-brand">
+            NAN SINAH KAN RA CANG
+          </div>
+
+          <div className="public-subtitle">
+            PUBLIC VIEW
+          </div>
         </div>
 
         <div className="live-badge">
@@ -258,14 +264,21 @@ function PublicView() {
       {!trip ? (
         <div className="no-trip-card">
           <div className="big-icon">🚗</div>
+
           <h1>NO ACTIVE TRIP</h1>
-          <p>The driver has not started a trip yet.</p>
+
+          <p>
+            The driver has not started a trip yet.
+          </p>
         </div>
       ) : (
         <main className="public-content">
           <section className="trip-card">
+
             <div className="trip-heading">
-              <div className="trip-heading-icon">🗺️</div>
+              <div className="trip-heading-icon">
+                🗺️
+              </div>
 
               <div>
                 <h1>YOUR TRIP</h1>
@@ -275,43 +288,61 @@ function PublicView() {
 
             {currentStop && (
               <div className="public-stop current-stop">
-                <div className="stop-label green-label">CURRENT</div>
+
+                <div className="stop-label green-label">
+                  {currentStop.status.toUpperCase()}
+                </div>
 
                 <div className="stop-info">
-                  <div className="house-icon">🏠</div>
+
+                  <div className="house-icon">
+                    🏠
+                  </div>
 
                   <div>
                     <h2>
-                      {currentStop.places?.name || "Current House"}
+                      {currentStop.places?.name ||
+                        "Current House"}
                     </h2>
 
                     <p>
                       {currentStop.places?.address || ""}
                     </p>
                   </div>
+
                 </div>
               </div>
             )}
 
             {nextStop && (
               <>
-                <div className="down-arrow">⌄</div>
+                <div className="down-arrow">
+                  ⌄
+                </div>
 
                 <div className="public-stop next-stop">
-                  <div className="stop-label blue-label">NEXT</div>
+
+                  <div className="stop-label blue-label">
+                    NEXT
+                  </div>
 
                   <div className="stop-info">
-                    <div className="house-icon">🏠</div>
+
+                    <div className="house-icon">
+                      🏠
+                    </div>
 
                     <div>
                       <h2>
-                        {nextStop.places?.name || "Next House"}
+                        {nextStop.places?.name ||
+                          "Next House"}
                       </h2>
 
                       <p>
                         {nextStop.places?.address || ""}
                       </p>
                     </div>
+
                   </div>
                 </div>
               </>
@@ -319,11 +350,19 @@ function PublicView() {
 
             {notification && (
               <div className="public-message">
-                <div className="message-icon">📢</div>
+
+                <div className="message-icon">
+                  📢
+                </div>
 
                 <div>
-                  <h3>{notification.title}</h3>
-                  <p>{notification.message}</p>
+                  <h3>
+                    {notification.title}
+                  </h3>
+
+                  <p>
+                    {notification.message}
+                  </p>
 
                   {notification.address && (
                     <p className="message-address">
@@ -331,13 +370,18 @@ function PublicView() {
                     </p>
                   )}
                 </div>
+
               </div>
             )}
+
           </section>
         </main>
       )}
 
-      <Link to="/" className="public-home-button">
+      <Link
+        to="/"
+        className="public-home-button"
+      >
         ← HOME
       </Link>
     </div>
@@ -349,6 +393,15 @@ function PublicView() {
 ========================================================= */
 
 function Admin() {
+
+  /*
+   * IMPORTANT:
+   * page controls which dashboard screen is displayed.
+   *
+   * This MUST stay inside Admin().
+   */
+  const [page, setPage] = useState("current-trip");
+
   const navigate = useNavigate();
 
   const [places, setPlaces] = useState([]);
@@ -368,36 +421,48 @@ function Admin() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  /* -------------------------------------------------------
+  /* =======================================================
      LOAD DATA
-  ------------------------------------------------------- */
+  ======================================================= */
 
   async function loadData() {
+
     if (!supabase) {
       setLoading(false);
       return;
     }
 
-    setLoading(true);
-
-    const { data: placesData } = await supabase
-      .from("places")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const { data: placesData } =
+      await supabase
+        .from("places")
+        .select("*")
+        .order("created_at", {
+          ascending: false,
+        });
 
     setPlaces(placesData || []);
 
-    const { data: tripData } = await supabase
-      .from("trips")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const { data: tripData } =
+      await supabase
+        .from("trips")
+        .select("*")
+        .order("created_at", {
+          ascending: false,
+        })
+        .limit(1)
+        .maybeSingle();
 
     setTrip(tripData || null);
 
-    if (tripData) {
-      const { data: stopsData } = await supabase
+    if (!tripData) {
+      setStops([]);
+      setNotifications([]);
+      setLoading(false);
+      return;
+    }
+
+    const { data: stopsData } =
+      await supabase
         .from("trip_stops")
         .select(
           `
@@ -412,32 +477,41 @@ function Admin() {
           `
         )
         .eq("trip_id", tripData.id)
-        .order("stop_order", { ascending: true });
+        .order("stop_order", {
+          ascending: true,
+        });
 
-      setStops(stopsData || []);
+    setStops(stopsData || []);
 
-      const { data: notificationData } = await supabase
+    const { data: notificationData } =
+      await supabase
         .from("notifications")
         .select("*")
         .eq("trip_id", tripData.id)
-        .order("created_at", { ascending: false });
+        .order("created_at", {
+          ascending: false,
+        });
 
-      setNotifications(notificationData || []);
-    } else {
-      setStops([]);
-      setNotifications([]);
-    }
+    setNotifications(
+      notificationData || []
+    );
 
     setLoading(false);
   }
 
+  /* =======================================================
+     REALTIME
+  ======================================================= */
+
   useEffect(() => {
+
     loadData();
 
     if (!supabase) return;
 
     const channel = supabase
       .channel("driver-live")
+
       .on(
         "postgres_changes",
         {
@@ -447,6 +521,7 @@ function Admin() {
         },
         loadData
       )
+
       .on(
         "postgres_changes",
         {
@@ -456,6 +531,7 @@ function Admin() {
         },
         loadData
       )
+
       .on(
         "postgres_changes",
         {
@@ -465,6 +541,7 @@ function Admin() {
         },
         loadData
       )
+
       .on(
         "postgres_changes",
         {
@@ -474,21 +551,30 @@ function Admin() {
         },
         loadData
       )
+
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
+
   }, []);
 
-  /* -------------------------------------------------------
+  /* =======================================================
      ADD PLACE
-  ------------------------------------------------------- */
+  ======================================================= */
 
   async function addPlace(e) {
+
     e.preventDefault();
 
-    if (!name.trim() || !address.trim()) return;
+    if (
+      !supabase ||
+      !name.trim() ||
+      !address.trim()
+    ) {
+      return;
+    }
 
     setSaving(true);
 
@@ -496,11 +582,14 @@ function Admin() {
       data: { user },
     } = await supabase.auth.getUser();
 
-    const { error } = await supabase.from("places").insert({
-      name: name.trim(),
-      address: address.trim(),
-      created_by: user?.id || null,
-    });
+    const { error } =
+      await supabase
+        .from("places")
+        .insert({
+          name: name.trim(),
+          address: address.trim(),
+          created_by: user?.id || null,
+        });
 
     setSaving(false);
 
@@ -513,19 +602,28 @@ function Admin() {
     setAddress("");
 
     await loadData();
+
+    setPage("places");
   }
 
-  /* -------------------------------------------------------
+  /* =======================================================
      DELETE PLACE
-  ------------------------------------------------------- */
+  ======================================================= */
 
   async function deletePlace(id) {
-    if (!confirm("Delete this place?")) return;
 
-    const { error } = await supabase
-      .from("places")
-      .delete()
-      .eq("id", id);
+    if (
+      !supabase ||
+      !confirm("Delete this place?")
+    ) {
+      return;
+    }
+
+    const { error } =
+      await supabase
+        .from("places")
+        .delete()
+        .eq("id", id);
 
     if (error) {
       alert(error.message);
@@ -535,25 +633,40 @@ function Admin() {
     await loadData();
   }
 
-  /* -------------------------------------------------------
+  /* =======================================================
      SELECT PLACE
-  ------------------------------------------------------- */
+  ======================================================= */
 
   function togglePlace(id) {
-    setSelectedPlaces((old) =>
-      old.includes(id)
-        ? old.filter((x) => x !== id)
-        : [...old, id]
-    );
+
+    setSelectedPlaces((old) => {
+
+      if (old.includes(id)) {
+        return old.filter(
+          (x) => x !== id
+        );
+      }
+
+      return [...old, id];
+    });
   }
 
-  /* -------------------------------------------------------
+  /* =======================================================
      START TRIP
-  ------------------------------------------------------- */
+  ======================================================= */
 
   async function startTrip() {
+
+    if (!supabase) return;
+
     if (selectedPlaces.length === 0) {
-      alert("Please select at least one place.");
+
+      alert(
+        "Please select at least one place."
+      );
+
+      setPage("places");
+
       return;
     }
 
@@ -568,111 +681,237 @@ function Admin() {
         .from("trips")
         .insert({
           status: "active",
-          started_at: new Date().toISOString(),
-          created_by: user?.id || null,
+          started_at:
+            new Date().toISOString(),
+          created_by:
+            user?.id || null,
           is_public_active: true,
         })
         .select()
         .single();
 
     if (tripError) {
+
       setSaving(false);
+
       alert(tripError.message);
+
       return;
     }
 
-    const stopRows = selectedPlaces.map((placeId, index) => ({
-      trip_id: newTrip.id,
-      place_id: placeId,
-      stop_order: index + 1,
-      status: index === 0 ? "current" : "next",
-    }));
+    const stopRows =
+      selectedPlaces.map(
+        (placeId, index) => ({
+          trip_id: newTrip.id,
+          place_id: placeId,
+          stop_order: index + 1,
+          status:
+            index === 0
+              ? "current"
+              : "next",
+        })
+      );
 
-    const { error: stopError } = await supabase
-      .from("trip_stops")
-      .insert(stopRows);
+    const { error: stopError } =
+      await supabase
+        .from("trip_stops")
+        .insert(stopRows);
 
     if (stopError) {
+
       setSaving(false);
+
       alert(stopError.message);
+
       return;
     }
 
     setSelectedPlaces([]);
+
+    setSaving(false);
+
+    await loadData();
+
+    setPage("current-trip");
+  }
+
+  /* =======================================================
+     UPDATE TRIP STATUS
+  ======================================================= */
+
+  async function updateTripStatus(status) {
+
+    if (!supabase) return;
+
+    if (!trip) {
+
+      alert(
+        "Start a trip first."
+      );
+
+      return;
+    }
+
+    const current =
+      stops.find((stop) =>
+        [
+          "current",
+          "coming",
+          "arrived",
+        ].includes(stop.status)
+      ) || stops[0];
+
+    if (!current) {
+      alert("There is no current stop.");
+      return;
+    }
+
+    setSaving(true);
+
+    /* DONE */
+
+    if (status === "done") {
+
+      const { error: stopError } =
+        await supabase
+          .from("trip_stops")
+          .update({
+            status: "completed",
+            completed_at:
+              new Date().toISOString(),
+          })
+          .eq("id", current.id);
+
+      if (stopError) {
+
+        setSaving(false);
+
+        alert(stopError.message);
+
+        return;
+      }
+
+      const next =
+        stops.find((stop) =>
+          [
+            "next",
+            "pending",
+          ].includes(stop.status)
+        );
+
+      if (next) {
+
+        await supabase
+          .from("trip_stops")
+          .update({
+            status: "current",
+          })
+          .eq("id", next.id);
+
+        await supabase
+          .from("trips")
+          .update({
+            status: "active",
+            is_public_active: true,
+          })
+          .eq("id", trip.id);
+
+      } else {
+
+        await supabase
+          .from("trips")
+          .update({
+            status: "completed",
+            is_public_active: false,
+            completed_at:
+              new Date().toISOString(),
+          })
+          .eq("id", trip.id);
+      }
+
+      setSaving(false);
+
+      await loadData();
+
+      setPage("current-trip");
+
+      return;
+    }
+
+    /* COMING / ARRIVED */
+
+    const stopUpdate = {
+      status,
+    };
+
+    if (
+      status === "coming" &&
+      !current.coming_at
+    ) {
+      stopUpdate.coming_at =
+        new Date().toISOString();
+    }
+
+    if (
+      status === "arrived" &&
+      !current.arrived_at
+    ) {
+      stopUpdate.arrived_at =
+        new Date().toISOString();
+    }
+
+    const { error } =
+      await supabase
+        .from("trip_stops")
+        .update(stopUpdate)
+        .eq("id", current.id);
+
+    if (error) {
+
+      setSaving(false);
+
+      alert(error.message);
+
+      return;
+    }
+
+    await supabase
+      .from("trips")
+      .update({
+        status: "active",
+        is_public_active: true,
+      })
+      .eq("id", trip.id);
+
     setSaving(false);
 
     await loadData();
   }
 
-  /* -------------------------------------------------------
-     UPDATE TRIP STATUS
-  ------------------------------------------------------- */
-
-  async function updateTripStatus(status) {
-    if (!trip) return;
-
-    let tripStatus = "active";
-
-    if (status === "done") {
-      tripStatus = "completed";
-    }
-
-    const { error } = await supabase
-      .from("trips")
-      .update({
-        status: tripStatus,
-        is_public_active: status !== "done",
-        completed_at:
-          status === "done"
-            ? new Date().toISOString()
-            : null,
-      })
-      .eq("id", trip.id);
-
-    if (error) {
-      alert(error.message);
-      return;
-    }
-
-    if (status === "done") {
-      await loadData();
-      return;
-    }
-
-    const current = stops[0];
-
-    if (!current) return;
-
-    await supabase
-      .from("trip_stops")
-      .update({
-        status,
-        coming_at:
-          status === "coming"
-            ? new Date().toISOString()
-            : current.coming_at,
-        arrived_at:
-          status === "arrived"
-            ? new Date().toISOString()
-            : current.arrived_at,
-      })
-      .eq("id", current.id);
-
-    await loadData();
-  }
-
-  /* -------------------------------------------------------
-     SEND PUBLIC MESSAGE
-  ------------------------------------------------------- */
+  /* =======================================================
+     PUBLIC MESSAGE
+  ======================================================= */
 
   async function sendNotification() {
-    if (!trip) {
-      alert("Start a trip first.");
+
+    if (!supabase || !trip) {
+
+      alert(
+        "Start a trip first."
+      );
+
       return;
     }
 
-    if (!messageTitle.trim() || !messageText.trim()) {
-      alert("Enter a title and message.");
+    if (
+      !messageTitle.trim() ||
+      !messageText.trim()
+    ) {
+
+      alert(
+        "Enter a title and message."
+      );
+
       return;
     }
 
@@ -680,24 +919,33 @@ function Admin() {
 
     await supabase
       .from("notifications")
-      .update({ active: false })
+      .update({
+        active: false,
+      })
       .eq("trip_id", trip.id);
 
-    const { error } = await supabase
-      .from("notifications")
-      .insert({
-        trip_id: trip.id,
-        stop_id: stops[0]?.id || null,
-        title: messageTitle.trim(),
-        message: messageText.trim(),
-        address: messageAddress.trim(),
-        active: true,
-      });
+    const { error } =
+      await supabase
+        .from("notifications")
+        .insert({
+          trip_id: trip.id,
+          stop_id:
+            stops[0]?.id || null,
+          title:
+            messageTitle.trim(),
+          message:
+            messageText.trim(),
+          address:
+            messageAddress.trim(),
+          active: true,
+        });
 
     setSaving(false);
 
     if (error) {
+
       alert(error.message);
+
       return;
     }
 
@@ -708,12 +956,12 @@ function Admin() {
     await loadData();
   }
 
-
-  /* -------------------------------------------------------
+  /* =======================================================
      SIGN OUT
-  ------------------------------------------------------- */
+  ======================================================= */
 
   async function signOut() {
+
     if (supabase) {
       await supabase.auth.signOut();
     }
@@ -721,95 +969,239 @@ function Admin() {
     navigate("/");
   }
 
-  /* -------------------------------------------------------
-     CURRENT / NEXT
-  ------------------------------------------------------- */
+  /* =======================================================
+     CURRENT / NEXT / FINAL
+  ======================================================= */
 
-  const currentStop = stops[0] || null;
-  const nextStop = stops[1] || null;
+  const currentStop =
+    stops.find((stop) =>
+      [
+        "current",
+        "coming",
+        "arrived",
+      ].includes(stop.status)
+    ) || null;
+
+  const nextStop =
+    stops.find((stop) =>
+      [
+        "next",
+        "pending",
+      ].includes(stop.status)
+    ) || null;
+
+  const finalStop =
+    stops.length
+      ? stops[stops.length - 1]
+      : null;
+
+  /* =======================================================
+     STATUS TEXT
+  ======================================================= */
 
   const statusText = useMemo(() => {
-    if (!trip) return "NO TRIP";
 
-    if (trip.status === "completed") return "DONE";
+    if (!trip) {
+      return "NO TRIP";
+    }
 
-    if (currentStop?.status === "arrived") return "ARRIVED";
+    if (
+      trip.status === "completed"
+    ) {
+      return "DONE";
+    }
 
-    if (currentStop?.status === "coming") return "COMING";
+    if (
+      currentStop?.status === "arrived"
+    ) {
+      return "ARRIVED";
+    }
+
+    if (
+      currentStop?.status === "coming"
+    ) {
+      return "COMING";
+    }
 
     return "ACTIVE";
+
   }, [trip, currentStop]);
 
-  /* -------------------------------------------------------
-     RENDER
-  ------------------------------------------------------- */
+  /* =======================================================
+     MENU
+  ======================================================= */
+
+  const menuItems = [
+    {
+      id: "current-trip",
+      icon: "🚗",
+      label: "Current Trip",
+    },
+    {
+      id: "places",
+      icon: "🏠",
+      label: "Places",
+    },
+    {
+      id: "add-place",
+      icon: "➕",
+      label: "Add Place",
+    },
+    {
+      id: "trip-plans",
+      icon: "📋",
+      label: "Trip Plans",
+    },
+    {
+      id: "letters",
+      icon: "📝",
+      label: "Letters",
+    },
+    {
+      id: "settings",
+      icon: "⚙️",
+      label: "Settings",
+    },
+  ];
+
+  /* =======================================================
+     LOADING
+  ======================================================= */
 
   if (loading) {
+
     return (
       <div className="loading-page">
-        <div>Loading Driver Dashboard...</div>
+        <div>
+          Loading Driver Dashboard...
+        </div>
       </div>
     );
   }
 
+  /* =======================================================
+     ADMIN RENDER
+  ======================================================= */
+
   return (
     <div className="driver-page">
 
-      {/* ================= HEADER ================= */}
+      {/* HEADER */}
 
       <header className="driver-header">
+
         <div className="driver-brand">
 
-          <div className="car-logo">🚗</div>
+          <div className="car-logo">
+            🚗
+          </div>
 
           <div className="brand-text">
-            <div>NAN SINAH KAN RA CANG</div>
-            <span>DRIVER</span>
+
+            <div>
+              NAN SINAH KAN RA CANG
+            </div>
+
+            <span>
+              DRIVER
+            </span>
+
           </div>
 
         </div>
 
         <div className="header-actions">
+
           <div className="notification-bell">
             🔔
+
             {notifications.length > 0 && (
-              <span>{notifications.length}</span>
+              <span>
+                {notifications.length}
+              </span>
             )}
+
           </div>
 
           <button
             className="menu-button"
+            type="button"
             onClick={() => {
+
               const menu =
-                document.getElementById("mobile-menu");
+                document.getElementById(
+                  "mobile-menu"
+                );
 
               if (menu) {
-                menu.classList.toggle("show");
+                menu.classList.toggle(
+                  "show"
+                );
               }
+
             }}
           >
             ☰
           </button>
+
         </div>
+
       </header>
 
-      {/* ================= MOBILE MENU ================= */}
+      {/* MOBILE MENU */}
 
-      <div id="mobile-menu" className="mobile-menu">
+      <div
+        id="mobile-menu"
+        className="mobile-menu"
+      >
 
-        <a href="#current-trip">🚗 Current Trip</a>
-        <a href="#places">🏠 Places</a>
-        <a href="#add-place">➕ Add Place</a>
-        <a href="#trip-plans">📋 Trip Plans</a>
-        <a href="#letters">📝 Letters</a>
-        <a href="#settings">⚙️ Settings</a>
+        {menuItems.map((item) => (
 
-        <Link to="/public">👀 Public View</Link>
+          <button
+            key={item.id}
+            type="button"
+            className={
+              page === item.id
+                ? "menu-active"
+                : ""
+            }
+            onClick={() => {
 
-        <button onClick={signOut}>🚪 Sign Out</button>
+              setPage(item.id);
+
+              document
+                .getElementById(
+                  "mobile-menu"
+                )
+                ?.classList.remove(
+                  "show"
+                );
+
+              window.scrollTo({
+                top: 0,
+              });
+
+            }}
+          >
+            {item.icon} {item.label}
+          </button>
+
+        ))}
+
+        <Link to="/public">
+          👀 Public View
+        </Link>
+
+        <button
+          type="button"
+          onClick={signOut}
+        >
+          🚪 Sign Out
+        </button>
+
       </div>
 
-      {/* ================= HERO ================= */}
+      {/* HERO */}
 
       <section className="hero-image">
 
@@ -817,514 +1209,775 @@ function Admin() {
           src="/Nan-Sinah-Kan-Ra-Cang/church.jpg"
           alt="Church"
           onError={(e) => {
-            e.currentTarget.style.display = "none";
+            e.currentTarget.style.display =
+              "none";
           }}
         />
 
       </section>
 
-      {/* ================= CURRENT TRIP ================= */}
+      {/* ===================================================
+          MAIN CONTENT
+      =================================================== */}
 
       <main className="driver-content">
 
-        <section
-          id="current-trip"
-          className="your-trip-card"
-        >
+        {/* CURRENT TRIP */}
 
-          <div className="trip-top">
+        {page === "current-trip" && (
 
-            <div className="trip-title">
+          <section
+            id="current-trip"
+            className="your-trip-card"
+          >
 
-              <div className="route-icon">
-                🗺️
+            <div className="trip-top">
+
+              <div className="trip-title">
+
+                <div className="route-icon">
+                  🗺️
+                </div>
+
+                <div>
+
+                  <h1>
+                    YOUR TRIP
+                  </h1>
+
+                  <p>
+                    Track and update the
+                    current trip
+                  </p>
+
+                </div>
+
+              </div>
+
+              <div className="live-pill">
+                <span></span>
+                LIVE
+              </div>
+
+            </div>
+
+            {/* CURRENT */}
+
+            <div className="route-stop current">
+
+              <div className="route-dot green"></div>
+
+              <div className="route-card">
+
+                <span className="route-label current-label">
+                  CURRENT
+                </span>
+
+                <div className="route-info">
+
+                  <div className="house-icon">
+                    🏠
+                  </div>
+
+                  <div>
+
+                    <h2>
+                      {currentStop?.places?.name ||
+                        "No Current House"}
+                    </h2>
+
+                    <p>
+                      {currentStop?.places?.address ||
+                        "Start a trip to show the current house"}
+                    </p>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+            <div className="route-arrow">
+              ↓
+            </div>
+
+            {/* NEXT */}
+
+            <div className="route-stop next">
+
+              <div className="route-dot blue"></div>
+
+              <div className="route-card">
+
+                <span className="route-label next-label">
+                  NEXT
+                </span>
+
+                <div className="route-info">
+
+                  <div className="house-icon">
+                    🏠
+                  </div>
+
+                  <div>
+
+                    <h2>
+                      {nextStop?.places?.name ||
+                        "No Next House"}
+                    </h2>
+
+                    <p>
+                      {nextStop?.places?.address ||
+                        "Next destination"}
+                    </p>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+            <div className="route-arrow">
+              ↓
+            </div>
+
+            {/* DESTINATION */}
+
+            <div className="route-stop destination">
+
+              <div className="route-dot dark"></div>
+
+              <div className="route-card">
+
+                <span className="route-label destination-label">
+                  DESTINATION
+                </span>
+
+                <div className="route-info">
+
+                  <div className="flag-icon">
+                    🏁
+                  </div>
+
+                  <div>
+
+                    <h2>
+                      {finalStop?.places?.name ||
+                        "Final Stop / Last House"}
+                    </h2>
+
+                    <p>
+                      {finalStop?.places?.address ||
+                        ""}
+                    </p>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+            {/* STATUS */}
+
+            <div className="trip-status">
+
+              <span>
+                Trip Status:
+              </span>
+
+              <strong>
+                {statusText}
+              </strong>
+
+            </div>
+
+            {/* BUTTONS */}
+
+            <div className="trip-buttons">
+
+              <button
+                className="start-button"
+                type="button"
+                onClick={startTrip}
+                disabled={saving}
+              >
+                ▶ START TRIP
+              </button>
+
+              <div className="two-buttons">
+
+                <button
+                  className="coming-button"
+                  type="button"
+                  onClick={() =>
+                    updateTripStatus(
+                      "coming"
+                    )
+                  }
+                  disabled={saving}
+                >
+                  🚗 COMING
+                </button>
+
+                <button
+                  className="arrived-button"
+                  type="button"
+                  onClick={() =>
+                    updateTripStatus(
+                      "arrived"
+                    )
+                  }
+                  disabled={saving}
+                >
+                  🏠 ARRIVED
+                </button>
+
+              </div>
+
+              <button
+                className="done-button"
+                type="button"
+                onClick={() =>
+                  updateTripStatus(
+                    "done"
+                  )
+                }
+                disabled={saving}
+              >
+                ✓ DONE
+              </button>
+
+            </div>
+
+            {/* PUBLIC MESSAGE */}
+
+            <div className="public-message-card">
+
+              <div className="message-big-icon">
+                📢
               </div>
 
               <div>
-                <h1>YOUR TRIP</h1>
+
+                <h3>
+                  PUBLIC MESSAGE
+                </h3>
+
                 <p>
-                  Track and update the current trip
+                  {notifications[0]?.message ||
+                    "We are waiting for the trip to start."}
                 </p>
-              </div>
-
-            </div>
-
-            <div className="live-pill">
-              <span></span>
-              LIVE
-            </div>
-
-          </div>
-
-          {/* CURRENT */}
-
-          <div className="route-stop current">
-
-            <div className="route-dot green"></div>
-
-            <div className="route-card">
-
-              <span className="route-label current-label">
-                CURRENT
-              </span>
-
-              <div className="route-info">
-
-                <div className="house-icon">
-                  🏠
-                </div>
-
-                <div>
-                  <h2>
-                    {currentStop?.places?.name ||
-                      "No Current House"}
-                  </h2>
-
-                  <p>
-                    {currentStop?.places?.address ||
-                      "Start a trip to show the current house"}
-                  </p>
-                </div>
 
               </div>
 
             </div>
 
-          </div>
+          </section>
 
-          <div className="route-arrow">
-            ↓
-          </div>
+        )}
 
-          {/* NEXT */}
+        {/* =================================================
+            PLACES
+        ================================================= */}
 
-          <div className="route-stop next">
+        {page === "places" && (
 
-            <div className="route-dot blue"></div>
+          <section
+            id="places"
+            className="dashboard-section"
+          >
 
-            <div className="route-card">
-
-              <span className="route-label next-label">
-                NEXT
-              </span>
-
-              <div className="route-info">
-
-                <div className="house-icon">
-                  🏠
-                </div>
-
-                <div>
-                  <h2>
-                    {nextStop?.places?.name ||
-                      "No Next House"}
-                  </h2>
-
-                  <p>
-                    {nextStop?.places?.address ||
-                      "Next destination"}
-                  </p>
-                </div>
-
-              </div>
-
+            <div className="section-heading">
+              <span>🏠</span>
+              <h2>PLACES</h2>
             </div>
 
-          </div>
+            <div className="place-list">
 
-          <div className="route-arrow">
-            ↓
-          </div>
+              {places.length === 0 ? (
 
-          {/* DESTINATION */}
-
-          <div className="route-stop destination">
-
-            <div className="route-dot dark"></div>
-
-            <div className="route-card">
-
-              <span className="route-label destination-label">
-                DESTINATION
-              </span>
-
-              <div className="route-info">
-
-                <div className="flag-icon">
-                  🏁
+                <div className="empty-box">
+                  No places yet.
                 </div>
 
-                <div>
-                  <h2>
-                    {stops.length > 0
-                      ? stops[stops.length - 1]?.places?.name ||
-                        "Final Stop"
-                      : "Final Stop / Last House"}
-                  </h2>
+              ) : (
 
-                  <p>
-                    {stops.length > 0
-                      ? stops[stops.length - 1]?.places?.address ||
-                        ""
-                      : ""}
-                  </p>
-                </div>
+                places.map((place) => (
 
-              </div>
+                  <div
+                    className="place-row"
+                    key={place.id}
+                  >
+
+                    <label>
+
+                      <input
+                        type="checkbox"
+                        checked={selectedPlaces.includes(
+                          place.id
+                        )}
+                        onChange={() =>
+                          togglePlace(
+                            place.id
+                          )
+                        }
+                      />
+
+                      <span>
+
+                        <strong>
+                          {place.name}
+                        </strong>
+
+                        <small>
+                          {place.address}
+                        </small>
+
+                      </span>
+
+                    </label>
+
+                    <button
+                      className="delete-button"
+                      type="button"
+                      onClick={() =>
+                        deletePlace(
+                          place.id
+                        )
+                      }
+                    >
+                      🗑️
+                    </button>
+
+                  </div>
+
+                ))
+
+              )}
 
             </div>
-
-          </div>
-
-          {/* STATUS */}
-
-          <div className="trip-status">
-            <span>Trip Status:</span>
-            <strong>{statusText}</strong>
-          </div>
-
-          {/* BUTTONS */}
-
-          <div className="trip-buttons">
 
             <button
               className="start-button"
+              type="button"
               onClick={startTrip}
               disabled={saving}
             >
               ▶ START TRIP
             </button>
 
-            <div className="two-buttons">
+          </section>
+
+        )}
+
+        {/* =================================================
+            ADD PLACE
+        ================================================= */}
+
+        {page === "add-place" && (
+
+          <section
+            id="add-place"
+            className="dashboard-section"
+          >
+
+            <div className="section-heading">
+
+              <span>➕</span>
+
+              <h2>
+                ADD PLACE
+              </h2>
+
+            </div>
+
+            <form
+              className="add-place-form"
+              onSubmit={addPlace}
+            >
+
+              <input
+                type="text"
+                placeholder="House / Owner Name"
+                value={name}
+                onChange={(e) =>
+                  setName(e.target.value)
+                }
+                required
+              />
+
+              <input
+                type="text"
+                placeholder="Address"
+                value={address}
+                onChange={(e) =>
+                  setAddress(
+                    e.target.value
+                  )
+                }
+                required
+              />
 
               <button
-                className="coming-button"
-                onClick={() =>
-                  updateTripStatus("coming")
-                }
+                type="submit"
+                disabled={saving}
               >
-                🚗 COMING
+                {saving
+                  ? "SAVING..."
+                  : "➕ ADD PLACE"}
               </button>
 
-              <button
-                className="arrived-button"
-                onClick={() =>
-                  updateTripStatus("arrived")
+            </form>
+
+          </section>
+
+        )}
+
+        {/* =================================================
+            TRIP PLANS
+        ================================================= */}
+
+        {page === "trip-plans" && (
+
+          <section
+            id="trip-plans"
+            className="dashboard-section"
+          >
+
+            <div className="section-heading">
+
+              <span>📋</span>
+
+              <h2>
+                TRIP PLANS
+              </h2>
+
+            </div>
+
+            <p>
+              Select places in the order
+              you want to visit them,
+              then press START TRIP.
+            </p>
+
+            <div className="selected-count">
+
+              {selectedPlaces.length}
+              {" "}
+              place(s) selected
+
+            </div>
+
+            <div className="place-list">
+
+              {selectedPlaces.map(
+                (id, index) => {
+
+                  const place =
+                    places.find(
+                      (p) =>
+                        p.id === id
+                    );
+
+                  if (!place) {
+                    return null;
+                  }
+
+                  return (
+                    <div
+                      className="place-row"
+                      key={id}
+                    >
+
+                      <span>
+
+                        <strong>
+                          {index + 1}.{" "}
+                          {place.name}
+                        </strong>
+
+                        <small>
+                          {place.address}
+                        </small>
+
+                      </span>
+
+                    </div>
+                  );
                 }
-              >
-                🏠 ARRIVED
-              </button>
+              )}
 
             </div>
 
             <button
-              className="done-button"
-              onClick={() =>
-                updateTripStatus("done")
-              }
+              className="start-button"
+              type="button"
+              onClick={startTrip}
+              disabled={saving}
             >
-              ✓ DONE
+              ▶ START TRIP
             </button>
 
-          </div>
+          </section>
 
-          {/* PUBLIC MESSAGE */}
+        )}
 
-          <div className="public-message-card">
+        {/* =================================================
+            LETTERS
+        ================================================= */}
 
-            <div className="message-big-icon">
-              📢
-            </div>
+        {page === "letters" && (
 
-            <div>
-              <h3>PUBLIC MESSAGE</h3>
-
-              <p>
-                {notifications[0]?.message ||
-                  "We are waiting for the trip to start."}
-              </p>
-
-            </div>
-
-          </div>
-
-        </section>
-
-        {/* ================= PLACES ================= */}
-
-        <section
-          id="places"
-          className="dashboard-section"
-        >
-
-          <div className="section-heading">
-            <span>🏠</span>
-            <h2>PLACES</h2>
-          </div>
-
-          <div className="place-list">
-
-            {places.length === 0 ? (
-              <div className="empty-box">
-                No places yet.
-              </div>
-            ) : (
-              places.map((place) => (
-                <div
-                  className="place-row"
-                  key={place.id}
-                >
-
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={selectedPlaces.includes(
-                        place.id
-                      )}
-                      onChange={() =>
-                        togglePlace(place.id)
-                      }
-                    />
-
-                    <span>
-                      <strong>
-                        {place.name}
-                      </strong>
-
-                      <small>
-                        {place.address}
-                      </small>
-                    </span>
-                  </label>
-
-                  <button
-                    className="delete-button"
-                    onClick={() =>
-                      deletePlace(place.id)
-                    }
-                  >
-                    🗑️
-                  </button>
-
-                </div>
-              ))
-            )}
-
-          </div>
-
-        </section>
-
-        {/* ================= ADD PLACE ================= */}
-
-        <section
-          id="add-place"
-          className="dashboard-section"
-        >
-
-          <div className="section-heading">
-            <span>➕</span>
-            <h2>ADD PLACE</h2>
-          </div>
-
-          <form
-            className="add-place-form"
-            onSubmit={addPlace}
+          <section
+            id="letters"
+            className="dashboard-section"
           >
+
+            <div className="section-heading">
+
+              <span>📝</span>
+
+              <h2>
+                LETTERS / PUBLIC MESSAGE
+              </h2>
+
+            </div>
 
             <input
               type="text"
-              placeholder="House / Owner Name"
-              value={name}
+              placeholder="Message title"
+              value={messageTitle}
               onChange={(e) =>
-                setName(e.target.value)
+                setMessageTitle(
+                  e.target.value
+                )
               }
-              required
+            />
+
+            <textarea
+              placeholder="Write your public message..."
+              value={messageText}
+              onChange={(e) =>
+                setMessageText(
+                  e.target.value
+                )
+              }
             />
 
             <input
               type="text"
               placeholder="Address"
-              value={address}
+              value={messageAddress}
               onChange={(e) =>
-                setAddress(e.target.value)
+                setMessageAddress(
+                  e.target.value
+                )
               }
-              required
             />
 
             <button
-              type="submit"
+              className="message-button"
+              type="button"
+              onClick={sendNotification}
               disabled={saving}
             >
-              {saving
-                ? "SAVING..."
-                : "➕ ADD PLACE"}
+              📢 SEND PUBLIC MESSAGE
             </button>
 
-          </form>
+          </section>
 
-        </section>
+        )}
 
-        {/* ================= TRIP PLANS ================= */}
+        {/* =================================================
+            SETTINGS
+        ================================================= */}
 
-        <section
-          id="trip-plans"
-          className="dashboard-section"
-        >
+        {page === "settings" && (
 
-          <div className="section-heading">
-            <span>📋</span>
-            <h2>TRIP PLANS</h2>
-          </div>
-
-          <p>
-            Select places above in the order you want
-            to visit them, then press START TRIP.
-          </p>
-
-          <div className="selected-count">
-            {selectedPlaces.length} place(s) selected
-          </div>
-
-        </section>
-
-        {/* ================= LETTERS ================= */}
-
-        <section
-          id="letters"
-          className="dashboard-section"
-        >
-
-          <div className="section-heading">
-            <span>📝</span>
-            <h2>LETTERS / PUBLIC MESSAGE</h2>
-          </div>
-
-          <input
-            type="text"
-            placeholder="Message title"
-            value={messageTitle}
-            onChange={(e) =>
-              setMessageTitle(e.target.value)
-            }
-          />
-
-          <textarea
-            placeholder="Write your public message..."
-            value={messageText}
-            onChange={(e) =>
-              setMessageText(e.target.value)
-            }
-          />
-
-          <input
-            type="text"
-            placeholder="Address"
-            value={messageAddress}
-            onChange={(e) =>
-              setMessageAddress(e.target.value)
-            }
-          />
-
-          <button
-            className="message-button"
-            onClick={sendNotification}
-            disabled={saving}
+          <section
+            id="settings"
+            className="dashboard-section"
           >
-            📢 SEND PUBLIC MESSAGE
-          </button>
 
-        </section>
+            <div className="section-heading">
 
-        {/* ================= SETTINGS ================= */}
+              <span>⚙️</span>
 
-        <section
-          id="settings"
-          className="dashboard-section"
-        >
+              <h2>
+                SETTINGS
+              </h2>
 
-          <div className="section-heading">
-            <span>⚙️</span>
-            <h2>SETTINGS</h2>
-          </div>
+            </div>
 
-          <Link
-            to="/public"
-            className="public-view-button"
-          >
-            👀 OPEN PUBLIC VIEW
-          </Link>
+            <Link
+              to="/public"
+              className="public-view-button"
+            >
+              👀 OPEN PUBLIC VIEW
+            </Link>
 
-          <button
-            className="signout-button"
-            onClick={signOut}
-          >
-            🚪 SIGN OUT
-          </button>
+            <button
+              className="signout-button"
+              type="button"
+              onClick={signOut}
+            >
+              🚪 SIGN OUT
+            </button>
 
-        </section>
+          </section>
+
+        )}
 
       </main>
 
-      {/* ================= BOTTOM NAV ================= */}
+      {/* =================================================
+          BOTTOM NAVIGATION
+
+          These are REAL buttons.
+          They change React page state.
+      ================================================= */}
 
       <nav className="bottom-nav">
 
-        <a href="#places">
-          <span>🏠</span>
-          <strong>Places</strong>
-        </a>
+        <button
+          type="button"
+          className={
+            `bottom-nav-button ${
+              page === "places"
+                ? "active"
+                : ""
+            }`
+          }
+          onClick={() => {
+            setPage("places");
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth",
+            });
+          }}
+        >
+          <span className="bottom-nav-icon">
+            🏠
+          </span>
 
-        <a href="#add-place">
-          <span>➕</span>
-          <strong>Add Place</strong>
-        </a>
+          <strong className="bottom-nav-label">
+            Places
+          </strong>
+        </button>
 
-        <a href="#trip-plans">
-          <span>📋</span>
-          <strong>Trip Plans</strong>
-        </a>
+        <button
+          type="button"
+          className={
+            `bottom-nav-button ${
+              page === "add-place"
+                ? "active"
+                : ""
+            }`
+          }
+          onClick={() => {
+            setPage("add-place");
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth",
+            });
+          }}
+        >
+          <span className="bottom-nav-icon">
+            ➕
+          </span>
 
-        <a href="#letters">
-          <span>✉️</span>
-          <strong>Letters</strong>
-        </a>
+          <strong className="bottom-nav-label">
+            Add Place
+          </strong>
+        </button>
 
-        <a href="#settings">
-          <span>⚙️</span>
-          <strong>Settings</strong>
-        </a>
+        <button
+          type="button"
+          className={
+            `bottom-nav-button ${
+              page === "trip-plans"
+                ? "active"
+                : ""
+            }`
+          }
+          onClick={() => {
+            setPage("trip-plans");
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth",
+            });
+          }}
+        >
+          <span className="bottom-nav-icon">
+            📋
+          </span>
+
+          <strong className="bottom-nav-label">
+            Trip Plans
+          </strong>
+        </button>
+
+        <button
+          type="button"
+          className={
+            `bottom-nav-button ${
+              page === "letters"
+                ? "active"
+                : ""
+            }`
+          }
+          onClick={() => {
+            setPage("letters");
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth",
+            });
+          }}
+        >
+          <span className="bottom-nav-icon">
+            ✉️
+          </span>
+
+          <strong className="bottom-nav-label">
+            Letters
+          </strong>
+        </button>
+
+        <button
+          type="button"
+          className={
+            `bottom-nav-button ${
+              page === "settings"
+                ? "active"
+                : ""
+            }`
+          }
+          onClick={() => {
+            setPage("settings");
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth",
+            });
+          }}
+        >
+          <span className="bottom-nav-icon">
+            ⚙️
+          </span>
+
+          <strong className="bottom-nav-label">
+            Settings
+          </strong>
+        </button>
 
       </nav>
 
     </div>
-  );
-}
-
-function BottomNavigation({ page, setPage }) {
-  const items = [
-    { id: "places", icon: "🏠", label: "Places" },
-    { id: "add-place", icon: "➕", label: "Add Place" },
-    { id: "trip-plans", icon: "📋", label: "Trip Plans" },
-    { id: "letters", icon: "✉️", label: "Letters" },
-    { id: "settings", icon: "⚙️", label: "Settings" },
-  ];
-
-  return (
-    <nav className="bottom-nav">
-      {items.map((item) => (
-        <button
-          key={item.id}
-          type="button"
-          className={`bottom-nav-button ${
-            page === item.id ? "active" : ""
-          }`}
-          onClick={() => setPage(item.id)}
-        >
-          <span className="bottom-nav-icon">{item.icon}</span>
-          <span className="bottom-nav-label">{item.label}</span>
-        </button>
-      ))}
-    </nav>
   );
 }
 
@@ -1335,6 +1988,7 @@ function BottomNavigation({ page, setPage }) {
 function App() {
   return (
     <HashRouter>
+
       <Routes>
 
         <Route
@@ -1358,11 +2012,10 @@ function App() {
         />
 
       </Routes>
+
     </HashRouter>
   );
 }
-
-
 
 /* =========================================================
    START REACT
@@ -1372,9 +2025,11 @@ const rootElement =
   document.getElementById("root");
 
 if (rootElement) {
+
   createRoot(rootElement).render(
     <React.StrictMode>
       <App />
     </React.StrictMode>
   );
+
 }
