@@ -349,7 +349,6 @@ function PublicView() {
 ========================================================= */
 
 function Admin() {
-const [page, setPage] = useState("current-trip");
   const navigate = useNavigate();
 
   const [places, setPlaces] = useState([]);
@@ -709,7 +708,6 @@ const [page, setPage] = useState("current-trip");
     await loadData();
   }
 
-{page === "current-trip" && (
 
   /* -------------------------------------------------------
      SIGN OUT
