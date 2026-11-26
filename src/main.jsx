@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
@@ -349,6 +350,7 @@ function PublicView() {
 ========================================================= */
 
 function Admin() {
+  const [page, setPage] = useState("current-trip");
   const navigate = useNavigate();
 
   const [places, setPlaces] = useState([]);
@@ -708,6 +710,30 @@ function Admin() {
     await loadData();
   }
 
+{page === "current-trip" && (
+  <CurrentTripSection />
+)}
+
+{page === "places" && (
+  <PlacesSection />
+)}
+
+{page === "add-place" && (
+  <AddPlaceSection />
+)}
+
+{page === "trip-plans" && (
+  <TripPlansSection />
+)}
+
+{page === "letters" && (
+  <LettersSection />
+)}
+
+{page === "settings" && (
+  <SettingsSection />
+)}
+  
   /* -------------------------------------------------------
      SIGN OUT
   ------------------------------------------------------- */
@@ -1299,6 +1325,34 @@ function Admin() {
   );
 }
 
+function BottomNavigation({ page, setPage }) {
+  const items = [
+    { id: "places", icon: "🏠", label: "Places" },
+    { id: "add-place", icon: "➕", label: "Add Place" },
+    { id: "trip-plans", icon: "📋", label: "Trip Plans" },
+    { id: "letters", icon: "✉️", label: "Letters" },
+    { id: "settings", icon: "⚙️", label: "Settings" },
+  ];
+
+  return (
+    <nav className="bottom-nav">
+      {items.map((item) => (
+        <button
+          key={item.id}
+          type="button"
+          className={`bottom-nav-button ${
+            page === item.id ? "active" : ""
+          }`}
+          onClick={() => setPage(item.id)}
+        >
+          <span className="bottom-nav-icon">{item.icon}</span>
+          <span className="bottom-nav-label">{item.label}</span>
+        </button>
+      ))}
+    </nav>
+  );
+}
+
 /* =========================================================
    APP
 ========================================================= */
@@ -1332,6 +1386,8 @@ function App() {
     </HashRouter>
   );
 }
+
+
 
 /* =========================================================
    START REACT
