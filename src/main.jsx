@@ -545,7 +545,7 @@ function Admin() {
 
 function App() {
   return (
-    <BrowserRouter>
+<BrowserRouter basename="/Nan-Sinah-Kan-Ra-Cang">
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/public" element={<PublicView />} />
