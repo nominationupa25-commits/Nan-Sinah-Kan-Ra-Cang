@@ -10,26 +10,112 @@ import {
 import { supabase, isSupabaseConfigured } from "./lib/supabase";
 import "./styles.css";
 
+/* =========================================================
+   HOME
+========================================================= */
+
 function Home() {
   return (
     <div className="home-page">
       <div className="home-card">
         <h1>NAN SINAH KAN RA CANG</h1>
-        <p>Live Trip & Public View</p>
+        <p>Driver & Public Trip System</p>
 
         <div className="home-buttons">
-          <Link className="primary-button" to="/public">
-            PUBLIC VIEW
+          <Link to="/admin/login" className="home-button">
+            🚗 DRIVER
           </Link>
 
-          <Link className="secondary-button" to="/admin/login">
-            DRIVER LOGIN
+          <Link to="/public" className="home-button public-button">
+            👀 PUBLIC VIEW
           </Link>
         </div>
       </div>
     </div>
   );
 }
+
+/* =========================================================
+   ADMIN LOGIN
+========================================================= */
+
+function AdminLogin() {
+  const navigate = useNavigate();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function login(e) {
+    e.preventDefault();
+
+    if (!supabase) {
+      setError("Supabase is not configured.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      setError(error.message);
+      return;
+    }
+
+    navigate("/admin");
+  }
+
+  return (
+    <div className="login-page">
+      <div className="login-card">
+        <div className="login-icon">🚗</div>
+
+        <h1>NAN SINAH KAN RA CANG</h1>
+        <h2>DRIVER LOGIN</h2>
+
+        <form onSubmit={login}>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+
+          {error && <div className="error-box">{error}</div>}
+
+          <button className="login-button" disabled={loading}>
+            {loading ? "SIGNING IN..." : "SIGN IN"}
+          </button>
+        </form>
+
+        <Link to="/" className="back-link">
+          ← Back
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   PUBLIC VIEW
+========================================================= */
 
 function PublicView() {
   const [trip, setTrip] = useState(null);
@@ -51,8 +137,9 @@ function PublicView() {
       .limit(1)
       .maybeSingle();
 
+    setTrip(tripData || null);
+
     if (!tripData) {
-      setTrip(null);
       setStops([]);
       setNotification(null);
       setLoading(false);
@@ -71,10 +158,12 @@ function PublicView() {
           latitude,
           longitude
         )
-      `
+        `
       )
       .eq("trip_id", tripData.id)
       .order("stop_order", { ascending: true });
+
+    setStops(stopData || []);
 
     const { data: notificationData } = await supabase
       .from("notifications")
@@ -85,9 +174,8 @@ function PublicView() {
       .limit(1)
       .maybeSingle();
 
-    setTrip(tripData);
-    setStops(stopData || []);
     setNotification(notificationData || null);
+
     setLoading(false);
   }
 
@@ -97,20 +185,32 @@ function PublicView() {
     if (!supabase) return;
 
     const channel = supabase
-      .channel("public-trip-updates")
+      .channel("public-trip-live")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "trips" },
+        {
+          event: "*",
+          schema: "public",
+          table: "trips",
+        },
         loadPublicTrip
       )
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "trip_stops" },
+        {
+          event: "*",
+          schema: "public",
+          table: "trip_stops",
+        },
         loadPublicTrip
       )
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "notifications" },
+        {
+          event: "*",
+          schema: "public",
+          table: "notifications",
+        },
         loadPublicTrip
       )
       .subscribe();
@@ -120,232 +220,172 @@ function PublicView() {
     };
   }, []);
 
-  if (loading) {
-    return (
-      <div className="public-page">
-        <div className="loading-card">Loading...</div>
-      </div>
-    );
-  }
-
-  if (!trip) {
-    return (
-      <div className="public-page">
-        <div className="public-card">
-          <h1>NAN SINAH KAN RA CANG</h1>
-          <div className="empty-state">
-            <h2>No Active Trip</h2>
-            <p>There is no active trip right now.</p>
-          </div>
-          <Link className="secondary-button" to="/">
-            BACK
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  const currentStop =
-    stops.find((stop) => stop.status === "current") ||
-    stops.find((stop) => stop.status === "coming") ||
-    stops.find((stop) => stop.status === "arrived");
+  const currentStop = stops.find(
+    (stop) =>
+      stop.status === "current" ||
+      stop.status === "coming" ||
+      stop.status === "arrived"
+  );
 
   const nextStop = stops.find(
     (stop) =>
-      stop.status === "pending" &&
-      stop.stop_order >
-        (currentStop?.stop_order || 0)
+      stop.status === "next" ||
+      stop.status === "pending"
   );
 
-  return (
-    <div className="public-page">
-      <div className="public-card">
-        <div className="public-header">
-          <h1>NAN SINAH KAN RA CANG</h1>
-          <span className="live-badge">● LIVE</span>
-        </div>
-
-        {notification && (
-          <div className="public-notification">
-            <h2>{notification.title}</h2>
-            <p>{notification.message}</p>
-
-            {notification.address && (
-              <div className="notification-address">
-                📍 {notification.address}
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="public-section">
-          <h3>CURRENT</h3>
-
-          {currentStop?.places ? (
-            <div className="public-place">
-              <div className="place-icon">🏠</div>
-              <div>
-                <strong>{currentStop.places.name}</strong>
-                <p>{currentStop.places.address}</p>
-              </div>
-            </div>
-          ) : (
-            <p>No current place.</p>
-          )}
-        </div>
-
-        <div className="public-section">
-          <h3>NEXT</h3>
-
-          {nextStop?.places ? (
-            <div className="public-place">
-              <div className="place-icon">🏠</div>
-              <div>
-                <strong>{nextStop.places.name}</strong>
-                <p>{nextStop.places.address}</p>
-              </div>
-            </div>
-          ) : (
-            <p>No next destination.</p>
-          )}
-        </div>
-
-        <div className="public-status">
-          <span>Trip Status</span>
-          <strong>● {String(trip.status || "").toUpperCase()}</strong>
-        </div>
-
-        <Link className="secondary-button full-button" to="/">
-          HOME
-        </Link>
+  if (loading) {
+    return (
+      <div className="loading-page">
+        <div>Loading Public View...</div>
       </div>
-    </div>
-  );
-}
-
-function AdminLogin() {
-  const navigate = useNavigate();
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  async function login(event) {
-    event.preventDefault();
-    setError("");
-
-    if (!supabase) {
-      setError("Supabase is not configured.");
-      return;
-    }
-
-    setLoading(true);
-
-    const { error: loginError } =
-      await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-    setLoading(false);
-
-    if (loginError) {
-      setError(loginError.message);
-      return;
-    }
-
-    navigate("/admin");
+    );
   }
 
   return (
-    <div className="login-page">
-      <form className="login-card" onSubmit={login}>
-        <h1>NAN SINAH KAN RA CANG</h1>
-        <h2>DRIVER LOGIN</h2>
+    <div className="public-page">
+      <header className="public-header">
+        <div>
+          <div className="public-brand">NAN SINAH KAN RA CANG</div>
+          <div className="public-subtitle">PUBLIC VIEW</div>
+        </div>
 
-        <label>Email</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Enter email"
-          required
-        />
+        <div className="live-badge">
+          <span className="live-dot"></span>
+          LIVE
+        </div>
+      </header>
 
-        <label>Password</label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Enter password"
-          required
-        />
+      {!trip ? (
+        <div className="no-trip-card">
+          <div className="big-icon">🚗</div>
+          <h1>NO ACTIVE TRIP</h1>
+          <p>The driver has not started a trip yet.</p>
+        </div>
+      ) : (
+        <main className="public-content">
+          <section className="trip-card">
+            <div className="trip-heading">
+              <div className="trip-heading-icon">🗺️</div>
 
-        {error && <div className="error-message">{error}</div>}
+              <div>
+                <h1>YOUR TRIP</h1>
+                <p>Track the current trip</p>
+              </div>
+            </div>
 
-        <button className="primary-button full-button" disabled={loading}>
-          {loading ? "LOGGING IN..." : "LOGIN"}
-        </button>
+            {currentStop && (
+              <div className="public-stop current-stop">
+                <div className="stop-label green-label">CURRENT</div>
 
-        <Link className="secondary-button full-button" to="/">
-          BACK
-        </Link>
-      </form>
+                <div className="stop-info">
+                  <div className="house-icon">🏠</div>
+
+                  <div>
+                    <h2>
+                      {currentStop.places?.name || "Current House"}
+                    </h2>
+
+                    <p>
+                      {currentStop.places?.address || ""}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {nextStop && (
+              <>
+                <div className="down-arrow">⌄</div>
+
+                <div className="public-stop next-stop">
+                  <div className="stop-label blue-label">NEXT</div>
+
+                  <div className="stop-info">
+                    <div className="house-icon">🏠</div>
+
+                    <div>
+                      <h2>
+                        {nextStop.places?.name || "Next House"}
+                      </h2>
+
+                      <p>
+                        {nextStop.places?.address || ""}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {notification && (
+              <div className="public-message">
+                <div className="message-icon">📢</div>
+
+                <div>
+                  <h3>{notification.title}</h3>
+                  <p>{notification.message}</p>
+
+                  {notification.address && (
+                    <p className="message-address">
+                      📍 {notification.address}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+          </section>
+        </main>
+      )}
+
+      <Link to="/" className="public-home-button">
+        ← HOME
+      </Link>
     </div>
   );
 }
+
+/* =========================================================
+   ADMIN
+========================================================= */
 
 function Admin() {
   const navigate = useNavigate();
 
-  const [user, setUser] = useState(null);
   const [places, setPlaces] = useState([]);
   const [trip, setTrip] = useState(null);
   const [stops, setStops] = useState([]);
   const [notifications, setNotifications] = useState([]);
 
-  const [placeName, setPlaceName] = useState("");
-  const [placeAddress, setPlaceAddress] = useState("");
+  const [name, setName] = useState("");
+  const [address, setAddress] = useState("");
 
   const [selectedPlaces, setSelectedPlaces] = useState([]);
 
-  const [message, setMessage] = useState("");
-  const [noticeTitle, setNoticeTitle] = useState("");
+  const [messageTitle, setMessageTitle] = useState("");
+  const [messageText, setMessageText] = useState("");
+  const [messageAddress, setMessageAddress] = useState("");
 
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    checkUser();
-  }, []);
+  /* -------------------------------------------------------
+     LOAD DATA
+  ------------------------------------------------------- */
 
-  async function checkUser() {
+  async function loadData() {
     if (!supabase) {
       setLoading(false);
       return;
     }
 
-    const { data } = await supabase.auth.getUser();
+    setLoading(true);
 
-    if (!data.user) {
-      navigate("/admin/login");
-      return;
-    }
-
-    setUser(data.user);
-    await loadData();
-    setLoading(false);
-  }
-
-  async function loadData() {
-    if (!supabase) return;
-
-    const { data: placeData } = await supabase
+    const { data: placesData } = await supabase
       .from("places")
       .select("*")
       .order("created_at", { ascending: false });
 
-    setPlaces(placeData || []);
+    setPlaces(placesData || []);
 
     const { data: tripData } = await supabase
       .from("trips")
@@ -354,64 +394,84 @@ function Admin() {
       .limit(1)
       .maybeSingle();
 
-    if (!tripData) {
-      setTrip(null);
+    setTrip(tripData || null);
+
+    if (tripData) {
+      const { data: stopsData } = await supabase
+        .from("trip_stops")
+        .select(
+          `
+          *,
+          places (
+            id,
+            name,
+            address,
+            latitude,
+            longitude
+          )
+          `
+        )
+        .eq("trip_id", tripData.id)
+        .order("stop_order", { ascending: true });
+
+      setStops(stopsData || []);
+
+      const { data: notificationData } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("trip_id", tripData.id)
+        .order("created_at", { ascending: false });
+
+      setNotifications(notificationData || []);
+    } else {
       setStops([]);
       setNotifications([]);
-      return;
     }
 
-    setTrip(tripData);
-
-    const { data: stopData } = await supabase
-      .from("trip_stops")
-      .select(
-        `
-        *,
-        places (
-          id,
-          name,
-          address
-        )
-      `
-      )
-      .eq("trip_id", tripData.id)
-      .order("stop_order", { ascending: true });
-
-    setStops(stopData || []);
-
-    const { data: notificationData } = await supabase
-      .from("notifications")
-      .select("*")
-      .eq("trip_id", tripData.id)
-      .order("created_at", { ascending: false });
-
-    setNotifications(notificationData || []);
+    setLoading(false);
   }
 
   useEffect(() => {
-    if (!supabase || !user) return;
+    loadData();
+
+    if (!supabase) return;
 
     const channel = supabase
-      .channel("admin-live-updates")
+      .channel("driver-live")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "trips" },
+        {
+          event: "*",
+          schema: "public",
+          table: "places",
+        },
         loadData
       )
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "trip_stops" },
+        {
+          event: "*",
+          schema: "public",
+          table: "trips",
+        },
         loadData
       )
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "places" },
+        {
+          event: "*",
+          schema: "public",
+          table: "trip_stops",
+        },
         loadData
       )
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "notifications" },
+        {
+          event: "*",
+          schema: "public",
+          table: "notifications",
+        },
         loadData
       )
       .subscribe();
@@ -419,35 +479,48 @@ function Admin() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, []);
 
-  async function addPlace(event) {
-    event.preventDefault();
+  /* -------------------------------------------------------
+     ADD PLACE
+  ------------------------------------------------------- */
 
-    if (!placeName.trim() || !placeAddress.trim()) return;
+  async function addPlace(e) {
+    e.preventDefault();
+
+    if (!name.trim() || !address.trim()) return;
+
+    setSaving(true);
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     const { error } = await supabase.from("places").insert({
-      name: placeName.trim(),
-      address: placeAddress.trim(),
-      created_by: user.id,
+      name: name.trim(),
+      address: address.trim(),
+      created_by: user?.id || null,
     });
+
+    setSaving(false);
 
     if (error) {
       alert(error.message);
       return;
     }
 
-    setPlaceName("");
-    setPlaceAddress("");
+    setName("");
+    setAddress("");
+
     await loadData();
   }
 
-  async function deletePlace(id) {
-    const confirmed = window.confirm(
-      "Delete this place?"
-    );
+  /* -------------------------------------------------------
+     DELETE PLACE
+  ------------------------------------------------------- */
 
-    if (!confirmed) return;
+  async function deletePlace(id) {
+    if (!confirm("Delete this place?")) return;
 
     const { error } = await supabase
       .from("places")
@@ -459,22 +532,24 @@ function Admin() {
       return;
     }
 
-    setSelectedPlaces((current) =>
-      current.filter((item) => item !== id)
-    );
-
     await loadData();
   }
 
-  function togglePlace(placeId) {
-    setSelectedPlaces((current) => {
-      if (current.includes(placeId)) {
-        return current.filter((id) => id !== placeId);
-      }
+  /* -------------------------------------------------------
+     SELECT PLACE
+  ------------------------------------------------------- */
 
-      return [...current, placeId];
-    });
+  function togglePlace(id) {
+    setSelectedPlaces((old) =>
+      old.includes(id)
+        ? old.filter((x) => x !== id)
+        : [...old, id]
+    );
   }
+
+  /* -------------------------------------------------------
+     START TRIP
+  ------------------------------------------------------- */
 
   async function startTrip() {
     if (selectedPlaces.length === 0) {
@@ -482,54 +557,70 @@ function Admin() {
       return;
     }
 
+    setSaving(true);
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     const { data: newTrip, error: tripError } =
       await supabase
         .from("trips")
         .insert({
           status: "active",
-          created_by: user.id,
-          is_public_active: true,
           started_at: new Date().toISOString(),
+          created_by: user?.id || null,
+          is_public_active: true,
         })
         .select()
         .single();
 
     if (tripError) {
+      setSaving(false);
       alert(tripError.message);
       return;
     }
 
-    const tripStops = selectedPlaces.map((placeId, index) => ({
+    const stopRows = selectedPlaces.map((placeId, index) => ({
       trip_id: newTrip.id,
       place_id: placeId,
       stop_order: index + 1,
-      status: index === 0 ? "current" : "pending",
+      status: index === 0 ? "current" : "next",
     }));
 
-    const { error: stopsError } = await supabase
+    const { error: stopError } = await supabase
       .from("trip_stops")
-      .insert(tripStops);
+      .insert(stopRows);
 
-    if (stopsError) {
-      alert(stopsError.message);
+    if (stopError) {
+      setSaving(false);
+      alert(stopError.message);
       return;
     }
 
     setSelectedPlaces([]);
-    await loadData();
+    setSaving(false);
 
-    document
-      .getElementById("current-trip")
-      ?.scrollIntoView({ behavior: "smooth" });
+    await loadData();
   }
+
+  /* -------------------------------------------------------
+     UPDATE TRIP STATUS
+  ------------------------------------------------------- */
 
   async function updateTripStatus(status) {
     if (!trip) return;
 
+    let tripStatus = "active";
+
+    if (status === "done") {
+      tripStatus = "completed";
+    }
+
     const { error } = await supabase
       .from("trips")
       .update({
-        status,
+        status: tripStatus,
         is_public_active: status !== "done",
         completed_at:
           status === "done"
@@ -543,59 +634,49 @@ function Admin() {
       return;
     }
 
-    await updateCurrentStopForStatus(status);
-    await loadData();
-  }
+    if (status === "done") {
+      await loadData();
+      return;
+    }
 
-  async function updateCurrentStopForStatus(status) {
-    if (!trip || stops.length === 0) return;
-
-    const current =
-      stops.find((stop) => stop.status === "current") ||
-      stops.find((stop) => stop.status === "coming") ||
-      stops.find((stop) => stop.status === "arrived");
+    const current = stops[0];
 
     if (!current) return;
-
-    let stopStatus = current.status;
-    const update = {};
-
-    if (status === "coming") {
-      stopStatus = "coming";
-      update.coming_at = new Date().toISOString();
-    }
-
-    if (status === "arrived") {
-      stopStatus = "arrived";
-      update.arrived_at = new Date().toISOString();
-    }
-
-    if (status === "done") {
-      stopStatus = "completed";
-      update.completed_at = new Date().toISOString();
-    }
 
     await supabase
       .from("trip_stops")
       .update({
-        status: stopStatus,
-        ...update,
+        status,
+        coming_at:
+          status === "coming"
+            ? new Date().toISOString()
+            : current.coming_at,
+        arrived_at:
+          status === "arrived"
+            ? new Date().toISOString()
+            : current.arrived_at,
       })
       .eq("id", current.id);
+
+    await loadData();
   }
 
-  async function sendNotification(title, text) {
+  /* -------------------------------------------------------
+     SEND PUBLIC MESSAGE
+  ------------------------------------------------------- */
+
+  async function sendNotification() {
     if (!trip) {
-      alert("There is no active trip.");
+      alert("Start a trip first.");
       return;
     }
 
-    const current =
-      stops.find((stop) => stop.status === "current") ||
-      stops.find((stop) => stop.status === "coming") ||
-      stops.find((stop) => stop.status === "arrived");
+    if (!messageTitle.trim() || !messageText.trim()) {
+      alert("Enter a title and message.");
+      return;
+    }
 
-    const address = current?.places?.address || "";
+    setSaving(true);
 
     await supabase
       .from("notifications")
@@ -606,288 +687,394 @@ function Admin() {
       .from("notifications")
       .insert({
         trip_id: trip.id,
-        stop_id: current?.id || null,
-        title,
-        message: text,
-        address,
+        stop_id: stops[0]?.id || null,
+        title: messageTitle.trim(),
+        message: messageText.trim(),
+        address: messageAddress.trim(),
         active: true,
       });
 
-    if (error) {
-      alert(error.message);
-      return;
-    }
-
-    setMessage("");
-    setNoticeTitle("");
-    await loadData();
-  }
-
-  async function sendCustomNotification(event) {
-    event.preventDefault();
-
-    if (!message.trim()) {
-      alert("Please write a message.");
-      return;
-    }
-
-    await sendNotification(
-      noticeTitle.trim() || "Message",
-      message.trim()
-    );
-  }
-
-  async function clearNotification() {
-    if (!trip) return;
-
-    const { error } = await supabase
-      .from("notifications")
-      .update({ active: false })
-      .eq("trip_id", trip.id);
+    setSaving(false);
 
     if (error) {
       alert(error.message);
       return;
     }
 
+    setMessageTitle("");
+    setMessageText("");
+    setMessageAddress("");
+
     await loadData();
   }
+
+  /* -------------------------------------------------------
+     SIGN OUT
+  ------------------------------------------------------- */
 
   async function signOut() {
-    await supabase.auth.signOut();
+    if (supabase) {
+      await supabase.auth.signOut();
+    }
+
     navigate("/");
   }
 
-  const currentStop = useMemo(
-    () =>
-      stops.find((stop) => stop.status === "current") ||
-      stops.find((stop) => stop.status === "coming") ||
-      stops.find((stop) => stop.status === "arrived"),
-    [stops]
-  );
+  /* -------------------------------------------------------
+     CURRENT / NEXT
+  ------------------------------------------------------- */
 
-  const nextStop = useMemo(
-    () =>
-      stops.find(
-        (stop) =>
-          stop.status === "pending" &&
-          stop.stop_order >
-            (currentStop?.stop_order || 0)
-      ),
-    [stops, currentStop]
-  );
+  const currentStop = stops[0] || null;
+  const nextStop = stops[1] || null;
+
+  const statusText = useMemo(() => {
+    if (!trip) return "NO TRIP";
+
+    if (trip.status === "completed") return "DONE";
+
+    if (currentStop?.status === "arrived") return "ARRIVED";
+
+    if (currentStop?.status === "coming") return "COMING";
+
+    return "ACTIVE";
+  }, [trip, currentStop]);
+
+  /* -------------------------------------------------------
+     RENDER
+  ------------------------------------------------------- */
 
   if (loading) {
-    return <div className="loading-page">Loading Driver Dashboard...</div>;
-  }
-
-  if (!supabase) {
     return (
       <div className="loading-page">
-        Supabase is not configured.
+        <div>Loading Driver Dashboard...</div>
       </div>
     );
   }
 
   return (
-    <div className="driver-layout">
-      <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-title">
-            NAN SINAH KAN RA CANG
-          </div>
-          <div className="brand-subtitle">DRIVER</div>
-        </div>
+    <div className="driver-page">
 
-        <nav className="side-nav">
-          <a href="#places">🏠 Places</a>
-          <a href="#add-place">➕ Add Place</a>
-          <a href="#trip-plans">📋 Trip Plans</a>
-          <a href="#current-trip">🚗 Current Trip</a>
-          <a href="#notifications">🔔 Notifications</a>
-          <a href="#letters">📝 Letters</a>
-          <a href="#settings">⚙️ Settings</a>
-        </nav>
+      {/* ================= HEADER ================= */}
 
-        <div className="sidebar-bottom">
-          <Link
-            className="public-link"
-            to="/public"
-            target="_blank"
-          >
-            👁 PUBLIC VIEW
-          </Link>
+      <header className="driver-header">
+        <div className="driver-brand">
 
-          <button className="logout-button" onClick={signOut}>
-            LOG OUT
-          </button>
-        </div>
-      </aside>
+          <div className="car-logo">🚗</div>
 
-      <main className="dashboard">
-        <div className="mobile-header">
-          <div>
-            <strong>NAN SINAH KAN RA CANG</strong>
+          <div className="brand-text">
+            <div>NAN SINAH KAN RA CANG</div>
             <span>DRIVER</span>
           </div>
 
-          <Link to="/public" target="_blank">
-            PUBLIC VIEW
-          </Link>
         </div>
 
-        <header className="dashboard-header">
-          <div>
-            <h1>Driver Dashboard</h1>
-            <p>Control the current trip and public updates.</p>
-          </div>
-
-          <div className="header-actions">
-            <Link
-              className="secondary-button"
-              to="/public"
-              target="_blank"
-            >
-              PUBLIC VIEW
-            </Link>
-          </div>
-        </header>
-
-        <section
-          id="current-trip"
-          className="dashboard-card current-trip-card"
-        >
-          <div className="section-title">
-            <span>🚗 CURRENT TRIP</span>
-
-            {trip && (
-              <span className="active-indicator">
-                ● ACTIVE
-              </span>
+        <div className="header-actions">
+          <div className="notification-bell">
+            🔔
+            {notifications.length > 0 && (
+              <span>{notifications.length}</span>
             )}
           </div>
 
-          {!trip ? (
-            <div className="empty-trip">
-              <h2>No Current Trip</h2>
-              <p>
-                Select places below and start a new trip.
-              </p>
+          <button
+            className="menu-button"
+            onClick={() => {
+              const menu =
+                document.getElementById("mobile-menu");
 
-              <button
-                className="primary-button"
-                onClick={startTrip}
-                disabled={selectedPlaces.length === 0}
-              >
-                START TRIP
-              </button>
+              if (menu) {
+                menu.classList.toggle("show");
+              }
+            }}
+          >
+            ☰
+          </button>
+        </div>
+      </header>
+
+      {/* ================= MOBILE MENU ================= */}
+
+      <div id="mobile-menu" className="mobile-menu">
+
+        <a href="#current-trip">🚗 Current Trip</a>
+        <a href="#places">🏠 Places</a>
+        <a href="#add-place">➕ Add Place</a>
+        <a href="#trip-plans">📋 Trip Plans</a>
+        <a href="#letters">📝 Letters</a>
+        <a href="#settings">⚙️ Settings</a>
+
+        <Link to="/public">👀 Public View</Link>
+
+        <button onClick={signOut}>🚪 Sign Out</button>
+      </div>
+
+      {/* ================= HERO ================= */}
+
+      <section className="hero-image">
+
+        <img
+          src="/Nan-Sinah-Kan-Ra-Cang/church.jpg"
+          alt="Church"
+          onError={(e) => {
+            e.currentTarget.style.display = "none";
+          }}
+        />
+
+      </section>
+
+      {/* ================= CURRENT TRIP ================= */}
+
+      <main className="driver-content">
+
+        <section
+          id="current-trip"
+          className="your-trip-card"
+        >
+
+          <div className="trip-top">
+
+            <div className="trip-title">
+
+              <div className="route-icon">
+                🗺️
+              </div>
+
+              <div>
+                <h1>YOUR TRIP</h1>
+                <p>
+                  Track and update the current trip
+                </p>
+              </div>
+
             </div>
-          ) : (
-            <>
-              <div className="trip-grid">
-                <div className="trip-location">
-                  <span className="location-label">
-                    Current:
-                  </span>
 
-                  {currentStop?.places ? (
-                    <>
-                      <h2>🏠 {currentStop.places.name}</h2>
-                      <p>{currentStop.places.address}</p>
-                    </>
-                  ) : (
-                    <p>No current place.</p>
-                  )}
-                </div>
+            <div className="live-pill">
+              <span></span>
+              LIVE
+            </div>
 
-                <div className="trip-location">
-                  <span className="location-label">
-                    Next:
-                  </span>
-
-                  {nextStop?.places ? (
-                    <>
-                      <h2>🏠 {nextStop.places.name}</h2>
-                      <p>{nextStop.places.address}</p>
-                    </>
-                  ) : (
-                    <p>No next place.</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="trip-status-line">
-                <span>Trip Status:</span>
-
-                <strong>
-                  ● {String(trip.status || "").toUpperCase()}
-                </strong>
-              </div>
-
-              <div className="control-buttons">
-                <button
-                  className="status-button start"
-                  onClick={() => updateTripStatus("active")}
-                >
-                  START TRIP
-                </button>
-
-                <button
-                  className="status-button coming"
-                  onClick={() => {
-                    updateTripStatus("coming");
-                    sendNotification(
-                      "WE ARE COMING TO YOU NOW",
-                      "We are coming to you now."
-                    );
-                  }}
-                >
-                  COMING
-                </button>
-
-                <button
-                  className="status-button arrived"
-                  onClick={() => {
-                    updateTripStatus("arrived");
-                    sendNotification(
-                      "WE ARE ARRIVED",
-                      "We are arrived."
-                    );
-                  }}
-                >
-                  ARRIVED
-                </button>
-
-                <button
-                  className="status-button done"
-                  onClick={() =>
-                    updateTripStatus("done")
-                  }
-                >
-                  DONE
-                </button>
-              </div>
-            </>
-          )}
-        </section>
-
-        <section id="places" className="dashboard-card">
-          <div className="section-title">
-            <span>🏠 PLACES</span>
-            <span className="count-badge">
-              {places.length}
-            </span>
           </div>
 
-          {places.length === 0 ? (
-            <p className="muted">
-              No places have been added yet.
-            </p>
-          ) : (
-            <div className="places-list">
-              {places.map((place) => (
-                <div className="place-row" key={place.id}>
-                  <label className="place-select">
+          {/* CURRENT */}
+
+          <div className="route-stop current">
+
+            <div className="route-dot green"></div>
+
+            <div className="route-card">
+
+              <span className="route-label current-label">
+                CURRENT
+              </span>
+
+              <div className="route-info">
+
+                <div className="house-icon">
+                  🏠
+                </div>
+
+                <div>
+                  <h2>
+                    {currentStop?.places?.name ||
+                      "No Current House"}
+                  </h2>
+
+                  <p>
+                    {currentStop?.places?.address ||
+                      "Start a trip to show the current house"}
+                  </p>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div className="route-arrow">
+            ↓
+          </div>
+
+          {/* NEXT */}
+
+          <div className="route-stop next">
+
+            <div className="route-dot blue"></div>
+
+            <div className="route-card">
+
+              <span className="route-label next-label">
+                NEXT
+              </span>
+
+              <div className="route-info">
+
+                <div className="house-icon">
+                  🏠
+                </div>
+
+                <div>
+                  <h2>
+                    {nextStop?.places?.name ||
+                      "No Next House"}
+                  </h2>
+
+                  <p>
+                    {nextStop?.places?.address ||
+                      "Next destination"}
+                  </p>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div className="route-arrow">
+            ↓
+          </div>
+
+          {/* DESTINATION */}
+
+          <div className="route-stop destination">
+
+            <div className="route-dot dark"></div>
+
+            <div className="route-card">
+
+              <span className="route-label destination-label">
+                DESTINATION
+              </span>
+
+              <div className="route-info">
+
+                <div className="flag-icon">
+                  🏁
+                </div>
+
+                <div>
+                  <h2>
+                    {stops.length > 0
+                      ? stops[stops.length - 1]?.places?.name ||
+                        "Final Stop"
+                      : "Final Stop / Last House"}
+                  </h2>
+
+                  <p>
+                    {stops.length > 0
+                      ? stops[stops.length - 1]?.places?.address ||
+                        ""
+                      : ""}
+                  </p>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* STATUS */}
+
+          <div className="trip-status">
+            <span>Trip Status:</span>
+            <strong>{statusText}</strong>
+          </div>
+
+          {/* BUTTONS */}
+
+          <div className="trip-buttons">
+
+            <button
+              className="start-button"
+              onClick={startTrip}
+              disabled={saving}
+            >
+              ▶ START TRIP
+            </button>
+
+            <div className="two-buttons">
+
+              <button
+                className="coming-button"
+                onClick={() =>
+                  updateTripStatus("coming")
+                }
+              >
+                🚗 COMING
+              </button>
+
+              <button
+                className="arrived-button"
+                onClick={() =>
+                  updateTripStatus("arrived")
+                }
+              >
+                🏠 ARRIVED
+              </button>
+
+            </div>
+
+            <button
+              className="done-button"
+              onClick={() =>
+                updateTripStatus("done")
+              }
+            >
+              ✓ DONE
+            </button>
+
+          </div>
+
+          {/* PUBLIC MESSAGE */}
+
+          <div className="public-message-card">
+
+            <div className="message-big-icon">
+              📢
+            </div>
+
+            <div>
+              <h3>PUBLIC MESSAGE</h3>
+
+              <p>
+                {notifications[0]?.message ||
+                  "We are waiting for the trip to start."}
+              </p>
+
+            </div>
+
+          </div>
+
+        </section>
+
+        {/* ================= PLACES ================= */}
+
+        <section
+          id="places"
+          className="dashboard-section"
+        >
+
+          <div className="section-heading">
+            <span>🏠</span>
+            <h2>PLACES</h2>
+          </div>
+
+          <div className="place-list">
+
+            {places.length === 0 ? (
+              <div className="empty-box">
+                No places yet.
+              </div>
+            ) : (
+              places.map((place) => (
+                <div
+                  className="place-row"
+                  key={place.id}
+                >
+
+                  <label>
                     <input
                       type="checkbox"
                       checked={selectedPlaces.includes(
@@ -900,10 +1087,12 @@ function Admin() {
 
                     <span>
                       <strong>
-                        🏠 {place.name}
+                        {place.name}
                       </strong>
 
-                      <small>{place.address}</small>
+                      <small>
+                        {place.address}
+                      </small>
                     </span>
                   </label>
 
@@ -913,291 +1102,248 @@ function Admin() {
                       deletePlace(place.id)
                     }
                   >
-                    DELETE
+                    🗑️
                   </button>
+
                 </div>
-              ))}
-            </div>
-          )}
-        </section>
+              ))
+            )}
 
-        <section id="add-place" className="dashboard-card">
-          <div className="section-title">
-            <span>➕ ADD PLACE</span>
           </div>
 
-          <form className="add-place-form" onSubmit={addPlace}>
-            <div>
-              <label>House / Owner Name</label>
-
-              <input
-                value={placeName}
-                onChange={(e) =>
-                  setPlaceName(e.target.value)
-                }
-                placeholder="Example: Johnson House"
-                required
-              />
-            </div>
-
-            <div>
-              <label>Address</label>
-
-              <input
-                value={placeAddress}
-                onChange={(e) =>
-                  setPlaceAddress(e.target.value)
-                }
-                placeholder="Example: 123 Main Street"
-                required
-              />
-            </div>
-
-            <button className="primary-button">
-              ADD PLACE
-            </button>
-          </form>
         </section>
 
-        <section id="trip-plans" className="dashboard-card">
-          <div className="section-title">
-            <span>📋 TRIP PLANS</span>
-          </div>
-
-          <p className="muted">
-            Select places in the Places section in the
-            order you want to visit them.
-          </p>
-
-          <div className="selected-count">
-            Selected: {selectedPlaces.length}
-          </div>
-
-          <button
-            className="primary-button"
-            onClick={startTrip}
-            disabled={
-              selectedPlaces.length === 0 || !!trip
-            }
-          >
-            {trip ? "TRIP ALREADY ACTIVE" : "START TRIP"}
-          </button>
-        </section>
+        {/* ================= ADD PLACE ================= */}
 
         <section
-          id="notifications"
-          className="dashboard-card"
+          id="add-place"
+          className="dashboard-section"
         >
-          <div className="section-title">
-            <span>🔔 NOTIFICATIONS</span>
-          </div>
 
-          <div className="quick-notifications">
-            <button
-              onClick={() =>
-                sendNotification(
-                  "WE ARE HERE",
-                  "We are here."
-                )
-              }
-            >
-              WE ARE HERE
-            </button>
-
-            <button
-              onClick={() =>
-                sendNotification(
-                  "NEXT, WE ARE GOING HERE",
-                  "Next, we are going here."
-                )
-              }
-            >
-              NEXT, WE ARE GOING HERE
-            </button>
-
-            <button
-              onClick={() =>
-                sendNotification(
-                  "WE ARE COMING TO YOU NOW",
-                  "We are coming to you now."
-                )
-              }
-            >
-              WE ARE COMING TO YOU NOW
-            </button>
-
-            <button
-              onClick={() =>
-                sendNotification(
-                  "WE ARE ARRIVED", 
-                  "We are arrived."
-                )
-              }
-            >
-              WE ARE ARRIVED
-            </button>
-
-            <button
-              className="clear-button"
-              onClick={clearNotification}
-            >
-              CLEAR NOTIFICATION
-            </button>
+          <div className="section-heading">
+            <span>➕</span>
+            <h2>ADD PLACE</h2>
           </div>
 
           <form
-            className="notification-form"
-            onSubmit={sendCustomNotification}
+            className="add-place-form"
+            onSubmit={addPlace}
           >
-            <label>Notification Title</label>
 
             <input
-              value={noticeTitle}
+              type="text"
+              placeholder="House / Owner Name"
+              value={name}
               onChange={(e) =>
-                setNoticeTitle(e.target.value)
+                setName(e.target.value)
               }
-              placeholder="Notification title"
+              required
             />
 
-            <label>Message</label>
-
-            <textarea
-              value={message}
+            <input
+              type="text"
+              placeholder="Address"
+              value={address}
               onChange={(e) =>
-                setMessage(e.target.value)
+                setAddress(e.target.value)
               }
-              placeholder="Write a message for the public..."
-              rows="4"
+              required
             />
-
-            <button className="primary-button">
-              SEND NOTIFICATION
-            </button>
-          </form>
-
-          {notifications.length > 0 && (
-            <div className="notification-history">
-              <h3>Notification History</h3>
-
-              {notifications.map((item) => (
-                <div
-                  className="history-item"
-                  key={item.id}
-                >
-                  <strong>{item.title}</strong>
-                  <p>{item.message}</p>
-
-                  {item.address && (
-                    <small>
-                      📍 {item.address}
-                    </small>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        <section id="letters" className="dashboard-card">
-          <div className="section-title">
-            <span>📝 LETTERS</span>
-          </div>
-
-          <p className="muted">
-            Use the notification message above to send
-            a letter or message to the public viewer.
-          </p>
-
-          <div className="letter-preview">
-            {notificationPreview(
-              notifications
-            )}
-          </div>
-        </section>
-
-        <section id="settings" className="dashboard-card">
-          <div className="section-title">
-            <span>⚙️ SETTINGS</span>
-          </div>
-
-          <div className="settings-row">
-            <div>
-              <strong>Driver Account</strong>
-              <p>{user?.email}</p>
-            </div>
 
             <button
-              className="secondary-button"
-              onClick={signOut}
+              type="submit"
+              disabled={saving}
             >
-              LOG OUT
+              {saving
+                ? "SAVING..."
+                : "➕ ADD PLACE"}
             </button>
-          </div>
 
-          <div className="settings-row">
-            <div>
-              <strong>Public View</strong>
-              <p>
-                Anyone can view the active trip without
-                logging in.
-              </p>
-            </div>
+          </form>
 
-            <Link
-              className="primary-button"
-              to="/public"
-              target="_blank"
-            >
-              OPEN PUBLIC VIEW
-            </Link>
-          </div>
         </section>
+
+        {/* ================= TRIP PLANS ================= */}
+
+        <section
+          id="trip-plans"
+          className="dashboard-section"
+        >
+
+          <div className="section-heading">
+            <span>📋</span>
+            <h2>TRIP PLANS</h2>
+          </div>
+
+          <p>
+            Select places above in the order you want
+            to visit them, then press START TRIP.
+          </p>
+
+          <div className="selected-count">
+            {selectedPlaces.length} place(s) selected
+          </div>
+
+        </section>
+
+        {/* ================= LETTERS ================= */}
+
+        <section
+          id="letters"
+          className="dashboard-section"
+        >
+
+          <div className="section-heading">
+            <span>📝</span>
+            <h2>LETTERS / PUBLIC MESSAGE</h2>
+          </div>
+
+          <input
+            type="text"
+            placeholder="Message title"
+            value={messageTitle}
+            onChange={(e) =>
+              setMessageTitle(e.target.value)
+            }
+          />
+
+          <textarea
+            placeholder="Write your public message..."
+            value={messageText}
+            onChange={(e) =>
+              setMessageText(e.target.value)
+            }
+          />
+
+          <input
+            type="text"
+            placeholder="Address"
+            value={messageAddress}
+            onChange={(e) =>
+              setMessageAddress(e.target.value)
+            }
+          />
+
+          <button
+            className="message-button"
+            onClick={sendNotification}
+            disabled={saving}
+          >
+            📢 SEND PUBLIC MESSAGE
+          </button>
+
+        </section>
+
+        {/* ================= SETTINGS ================= */}
+
+        <section
+          id="settings"
+          className="dashboard-section"
+        >
+
+          <div className="section-heading">
+            <span>⚙️</span>
+            <h2>SETTINGS</h2>
+          </div>
+
+          <Link
+            to="/public"
+            className="public-view-button"
+          >
+            👀 OPEN PUBLIC VIEW
+          </Link>
+
+          <button
+            className="signout-button"
+            onClick={signOut}
+          >
+            🚪 SIGN OUT
+          </button>
+
+        </section>
+
       </main>
+
+      {/* ================= BOTTOM NAV ================= */}
+
+      <nav className="bottom-nav">
+
+        <a href="#places">
+          <span>🏠</span>
+          <strong>Places</strong>
+        </a>
+
+        <a href="#add-place">
+          <span>➕</span>
+          <strong>Add Place</strong>
+        </a>
+
+        <a href="#trip-plans">
+          <span>📋</span>
+          <strong>Trip Plans</strong>
+        </a>
+
+        <a href="#letters">
+          <span>✉️</span>
+          <strong>Letters</strong>
+        </a>
+
+        <a href="#settings">
+          <span>⚙️</span>
+          <strong>Settings</strong>
+        </a>
+
+      </nav>
+
     </div>
   );
 }
 
-function notificationPreview(notifications) {
-  const active = notifications.find(
-    (item) => item.active
-  );
-
-  if (!active) {
-    return (
-      <div className="empty-letter">
-        No active letter or message.
-      </div>
-    );
-  }
-
-  return (
-    <div className="letter">
-      <h3>{active.title}</h3>
-      <p>{active.message}</p>
-
-      {active.address && (
-        <div>📍 {active.address}</div>
-      )}
-    </div>
-  );
-}
+/* =========================================================
+   APP
+========================================================= */
 
 function App() {
   return (
-     <HashRouter>
+    <HashRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/public" element={<PublicView />} />
+
+        <Route
+          path="/"
+          element={<Home />}
+        />
+
+        <Route
+          path="/public"
+          element={<PublicView />}
+        />
+
         <Route
           path="/admin/login"
           element={<AdminLogin />}
         />
-        <Route path="/admin" element={<Admin />} />
-            </Routes>
+
+        <Route
+          path="/admin"
+          element={<Admin />}
+        />
+
+      </Routes>
     </HashRouter>
   );
 }
 
-export default App;
+/* =========================================================
+   START REACT
+========================================================= */
 
-createRoot(document.getElementById("root")).render(<App />);
+const rootElement =
+  document.getElementById("root");
+
+if (rootElement) {
+  createRoot(rootElement).render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  );
+}
