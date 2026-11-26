@@ -349,7 +349,7 @@ function PublicView() {
 ========================================================= */
 
 function Admin() {
-  const [page, setPage] = useState("current-trip");
+
   const navigate = useNavigate();
 
   const [places, setPlaces] = useState([]);
@@ -710,29 +710,7 @@ function Admin() {
   }
 
 {page === "current-trip" && (
-  <CurrentTripSection />
-)}
 
-{page === "places" && (
-  <PlacesSection />
-)}
-
-{page === "add-place" && (
-  <AddPlaceSection />
-)}
-
-{page === "trip-plans" && (
-  <TripPlansSection />
-)}
-
-{page === "letters" && (
-  <LettersSection />
-)}
-
-{page === "settings" && (
-  <SettingsSection />
-)}
-  
   /* -------------------------------------------------------
      SIGN OUT
   ------------------------------------------------------- */
