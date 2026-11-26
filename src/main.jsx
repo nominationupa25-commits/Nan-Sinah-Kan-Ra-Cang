@@ -1206,7 +1206,7 @@ function Admin() {
       <section className="hero-image">
 
         <img
-          src="/Nan-Sinah-Kan-Ra-Cang/church.jpg"
+          src=""/Nan-Sinah-Kan-Ra-Cang/file_00000000af84822fa5abeb2e9ea9ff0d.png"
           alt="Church"
           onError={(e) => {
             e.currentTarget.style.display =
