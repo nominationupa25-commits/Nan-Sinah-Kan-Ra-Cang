@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  BrowserRouter,
+  HashRouter,
   Routes,
   Route,
   Link,
@@ -1183,7 +1183,7 @@ function notificationPreview(notifications) {
 
 function App() {
   return (
-    <BrowserRouter>
+     <HashRouter>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/public" element={<PublicView />} />
@@ -1192,8 +1192,8 @@ function App() {
           element={<AdminLogin />}
         />
         <Route path="/admin" element={<Admin />} />
-      </Routes>
-    </BrowserRouter>
+            </Routes>
+    </HashRouter>
   );
 }
 
