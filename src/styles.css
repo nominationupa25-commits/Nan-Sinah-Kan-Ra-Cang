@@ -1,10 +1,13 @@
 /* =========================================================
    NAN SINAH KAN RA CANG
-   DRIVER DASHBOARD
+   DRIVER APP
+   MOBILE + DESKTOP DESIGN
 ========================================================= */
 
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 html {
@@ -12,190 +15,29 @@ html {
 }
 
 body {
-  margin: 0;
-  padding: 0;
   font-family:
     Arial,
     Helvetica,
     sans-serif;
-  background: #edf5ff;
-  color: #102b55;
+
+  background: #eaf3fc;
+  color: #102f5f;
+  min-width: 320px;
 }
 
 button,
 input,
-textarea {
+textarea,
+select {
   font-family: inherit;
 }
 
-button {
-  cursor: pointer;
-}
-
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-a {
-  text-decoration: none;
-}
-
 /* =========================================================
-   LOADING
+   APP
 ========================================================= */
 
-.loading-page {
+#root {
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #edf5ff;
-  color: #0b459c;
-  font-size: 22px;
-  font-weight: 700;
-}
-
-/* =========================================================
-   HOME
-========================================================= */
-
-.home-page {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  background:
-    linear-gradient(135deg, #0b459c, #1976d2);
-}
-
-.home-card {
-  width: min(520px, 100%);
-  padding: 40px 28px;
-  background: white;
-  border-radius: 28px;
-  text-align: center;
-  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.18);
-}
-
-.home-card h1 {
-  margin: 0;
-  color: #0b459c;
-  font-size: 34px;
-  font-weight: 900;
-}
-
-.home-card p {
-  color: #203b63;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.home-buttons {
-  display: grid;
-  gap: 16px;
-  margin-top: 30px;
-}
-
-.home-button {
-  display: block;
-  padding: 18px;
-  border-radius: 16px;
-  background: #0b459c;
-  color: white;
-  font-size: 20px;
-  font-weight: 800;
-}
-
-.public-button {
-  background: #16a637;
-}
-
-/* =========================================================
-   LOGIN
-========================================================= */
-
-.login-page {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  background: #edf5ff;
-}
-
-.login-card {
-  width: min(450px, 100%);
-  padding: 34px 26px;
-  background: white;
-  border-radius: 28px;
-  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.16);
-  text-align: center;
-}
-
-.login-icon {
-  font-size: 55px;
-}
-
-.login-card h1 {
-  color: #0b459c;
-  font-size: 28px;
-  margin: 10px 0 4px;
-}
-
-.login-card h2 {
-  color: #f0c400;
-  font-size: 22px;
-  margin: 0 0 24px;
-}
-
-.login-card form {
-  display: grid;
-  gap: 14px;
-}
-
-.login-card input {
-  width: 100%;
-  padding: 15px;
-  border: 2px solid #c8d7ea;
-  border-radius: 12px;
-  font-size: 16px;
-}
-
-.login-button {
-  border: 0;
-  border-radius: 14px;
-  padding: 16px;
-  background: #0b459c;
-  color: white;
-  font-size: 18px;
-  font-weight: 800;
-}
-
-.error-box {
-  padding: 12px;
-  border-radius: 10px;
-  background: #ffe1e1;
-  color: #a00000;
-  font-weight: 600;
-}
-
-.back-link {
-  display: inline-block;
-  margin-top: 22px;
-  color: #0b459c;
-  font-weight: 700;
-}
-
-/* =========================================================
-   DRIVER PAGE
-========================================================= */
-
-.driver-page {
-  min-height: 100vh;
-  background: #edf5ff;
-  padding-bottom: 115px;
 }
 
 /* =========================================================
@@ -203,20 +45,26 @@ a {
 ========================================================= */
 
 .driver-header {
+  width: 100%;
   min-height: 235px;
-  padding: 48px 42px 40px;
-  background:
-    linear-gradient(
-      135deg,
-      #0d4aa5 0%,
-      #1455b5 55%,
-      #0a4297 100%
-    );
+
+  background: linear-gradient(
+    135deg,
+    #0d47a1 0%,
+    #1458b8 50%,
+    #0d47a1 100%
+  );
+
   color: white;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 8px 25px rgba(0, 50, 120, 0.22);
+
+  padding: 35px 55px;
+
+  position: relative;
+  z-index: 20;
 }
 
 .driver-brand {
@@ -225,534 +73,584 @@ a {
   gap: 25px;
 }
 
-.car-logo {
-  font-size: 54px;
+.driver-car {
+  font-size: 62px;
   line-height: 1;
 }
 
-.brand-text {
-  font-size: 32px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-}
-
-.brand-text span {
-  display: block;
-  margin-top: 6px;
-  color: #ffd900;
-  font-size: 30px;
+.driver-title {
+  font-size: 42px;
   font-weight: 900;
+  letter-spacing: 1px;
+  line-height: 1.05;
 }
 
-.header-actions {
+.driver-subtitle {
+  color: #ffd600;
+  font-size: 40px;
+  font-weight: 900;
+  margin-top: 8px;
+}
+
+.driver-header-right {
   display: flex;
   align-items: center;
-  gap: 26px;
+  gap: 35px;
 }
 
 .notification-bell {
+  font-size: 55px;
   position: relative;
-  font-size: 42px;
 }
 
-.notification-bell span {
+.notification-count {
   position: absolute;
-  top: -12px;
+  top: -10px;
   right: -15px;
-  min-width: 34px;
-  height: 34px;
-  padding: 5px 8px;
-  border-radius: 50px;
-  background: #f32929;
+
+  background: #f44336;
   color: white;
-  font-size: 16px;
+
+  width: 42px;
+  height: 42px;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 22px;
   font-weight: 900;
-  text-align: center;
 }
 
 .menu-button {
   border: 0;
   background: transparent;
   color: white;
-  font-size: 58px;
+
+  font-size: 65px;
   line-height: 1;
+
+  cursor: pointer;
 }
 
 /* =========================================================
-   MOBILE MENU
+   DESKTOP NAV
 ========================================================= */
 
-.mobile-menu {
-  display: none;
-  position: absolute;
-  top: 235px;
-  right: 20px;
-  z-index: 50;
-  width: 260px;
-  padding: 16px;
+.desktop-nav {
   background: white;
-  border-radius: 18px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
-}
 
-.mobile-menu.show {
-  display: grid;
-  gap: 4px;
-}
-
-.mobile-menu a,
-.mobile-menu button {
-  display: block;
-  width: 100%;
-  padding: 15px;
-  border: 0;
-  border-radius: 10px;
-  background: white;
-  color: #102b55;
-  text-align: left;
-  font-size: 17px;
-  font-weight: 700;
-}
-
-.mobile-menu a:hover,
-.mobile-menu button:hover {
-  background: #edf5ff;
-}
-
-/* =========================================================
-   HERO
-========================================================= */
-
-.hero-image {
-  width: 100%;
-  height: 430px;
-  background:
-    linear-gradient(
-      180deg,
-      #c9d9ec 0%,
-      #dce8f6 100%
-    );
-  overflow: hidden;
-}
-
-.hero-image img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-}
-
-/* =========================================================
-   DRIVER CONTENT
-========================================================= */
-
-.driver-content {
-  width: min(1100px, calc(100% - 32px));
-  margin: 28px auto 0;
-}
-
-/* =========================================================
-   YOUR TRIP CARD
-========================================================= */
-
-.your-trip-card {
-  background: white;
-  border-radius: 38px;
-  padding: 42px 34px 34px;
-  box-shadow:
-    0 12px 35px rgba(36, 80, 130, 0.14);
-}
-
-.trip-top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  margin-bottom: 38px;
+  justify-content: center;
+
+  gap: 28px;
+
+  padding: 18px 20px;
+
+  border-bottom: 1px solid #d7e2ef;
+
+  position: sticky;
+  top: 0;
+  z-index: 15;
 }
 
-.trip-title {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
+.desktop-nav a {
+  color: #173b73;
+  text-decoration: none;
 
-.route-icon {
-  font-size: 58px;
-}
-
-.trip-title h1 {
-  margin: 0;
-  color: #0b459c;
-  font-size: 72px;
-  line-height: 0.95;
-  font-weight: 950;
-  letter-spacing: -2px;
-}
-
-.trip-title p {
-  margin: 20px 0 0;
-  color: #102b55;
-  font-size: 25px;
+  font-size: 18px;
   font-weight: 800;
-}
 
-.live-pill {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 25px;
-  border-radius: 50px;
-  background: #08bd1b;
-  color: white;
-  font-size: 24px;
-  font-weight: 900;
   white-space: nowrap;
 }
 
-.live-pill span {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #62ff6e;
+.desktop-nav a:hover {
+  color: #0d47a1;
 }
 
 /* =========================================================
-   ROUTE
+   MAIN DASHBOARD
 ========================================================= */
 
-.route-stop {
-  display: grid;
-  grid-template-columns: 90px 1fr;
-  gap: 18px;
-  align-items: center;
+.dashboard {
+  width: 100%;
+  max-width: 1100px;
+
+  margin: 0 auto;
+
+  padding: 55px 28px 150px;
 }
 
-.route-dot {
-  width: 52px;
-  height: 52px;
-  margin-left: 12px;
-  border: 8px solid white;
-  border-radius: 50%;
+/* =========================================================
+   YOUR TRIP HERO
+========================================================= */
+
+.trip-hero {
+  background: white;
+
+  border-radius: 38px;
+
+  padding: 60px 55px 70px;
+
+  margin-bottom: 30px;
+
   box-shadow:
-    0 0 0 6px currentColor;
+    0 10px 35px rgba(31, 76, 125, 0.12);
+}
+
+.trip-hero-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 20px;
+}
+
+.trip-title-row {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.trip-map-icon {
+  font-size: 62px;
+}
+
+.trip-title {
+  color: #0d47a1;
+
+  font-size: 82px;
+  font-weight: 900;
+
+  line-height: 0.95;
+
+  letter-spacing: -2px;
+}
+
+.trip-subtitle {
+  margin-left: 85px;
+  margin-top: 25px;
+
+  color: #173b73;
+
+  font-size: 28px;
+  font-weight: 800;
+}
+
+/* =========================================================
+   LIVE BADGE
+========================================================= */
+
+.live-badge {
+  background: #00c51a;
+  color: white;
+
+  border-radius: 50px;
+
+  padding: 18px 30px;
+
+  font-size: 25px;
+  font-weight: 900;
+
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  white-space: nowrap;
+}
+
+.live-dot {
+  width: 22px;
+  height: 22px;
+
+  background: #55f76a;
+
+  border-radius: 50%;
+}
+
+/* =========================================================
+   TRIP FLOW
+========================================================= */
+
+.trip-flow {
+  margin-top: 55px;
+}
+
+.trip-stop {
+  display: flex;
+  align-items: center;
+
+  gap: 25px;
+
+  margin-bottom: 25px;
+}
+
+.trip-circle {
+  width: 76px;
+  height: 76px;
+
+  min-width: 76px;
+
+  border: 9px solid #00b91c;
+
+  border-radius: 50%;
+
   background: white;
 }
 
-.route-dot.green {
-  color: #08b91c;
+.trip-circle.next {
+  border-color: #1267db;
 }
 
-.route-dot.blue {
-  color: #0d68e8;
+.trip-circle.destination {
+  border-color: #7b8799;
 }
 
-.route-dot.dark {
-  color: #6d7b91;
-}
+.trip-stop-card {
+  flex: 1;
 
-.route-card {
-  min-height: 135px;
-  padding: 20px 28px;
-  border-radius: 34px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
+  min-height: 170px;
 
-.route-stop.current .route-card {
-  background:
-    linear-gradient(
-      100deg,
-      #d9f8df,
-      #b9efc7
-    );
-}
+  border-radius: 35px;
 
-.route-stop.next .route-card {
-  background:
-    linear-gradient(
-      100deg,
-      #dcecff,
-      #bddbfa
-    );
-}
+  padding: 25px 30px;
 
-.route-stop.destination .route-card {
-  background:
-    linear-gradient(
-      100deg,
-      #edf0f4,
-      #d9dfe7
-    );
-}
-
-.route-label {
-  width: fit-content;
-  padding: 9px 22px;
-  border-radius: 40px;
-  color: white;
-  font-size: 19px;
-  font-weight: 900;
-  margin-bottom: 10px;
-}
-
-.current-label {
-  background: #0ab61c;
-}
-
-.next-label {
-  background: #0869df;
-}
-
-.destination-label {
-  background: #5c687b;
-}
-
-.route-info {
   display: flex;
   align-items: center;
-  gap: 18px;
+
+  gap: 20px;
 }
 
-.house-icon,
-.flag-icon {
-  font-size: 52px;
-  line-height: 1;
+.trip-stop-card.current {
+  background: linear-gradient(
+    135deg,
+    #d9f9df,
+    #b8f0c5
+  );
 }
 
-.route-info h2 {
-  margin: 0;
-  color: #081e43;
-  font-size: 32px;
+.trip-stop-card.next {
+  background: linear-gradient(
+    135deg,
+    #dcecff,
+    #bdd9f7
+  );
+}
+
+.trip-stop-card.destination {
+  background: linear-gradient(
+    135deg,
+    #edf1f6,
+    #d9dfe7
+  );
+}
+
+.stop-content {
+  flex: 1;
+}
+
+.stop-label {
+  display: inline-block;
+
+  border-radius: 40px;
+
+  padding: 10px 25px;
+
+  color: white;
+
+  font-size: 22px;
   font-weight: 900;
+
+  margin-bottom: 12px;
 }
 
-.route-info p {
-  margin: 6px 0 0;
-  color: #173765;
+.current .stop-label {
+  background: #00b91c;
+}
+
+.next .stop-label {
+  background: #1267db;
+}
+
+.destination .stop-label {
+  background: #657286;
+}
+
+.stop-main {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.stop-icon {
+  font-size: 58px;
+}
+
+.stop-name {
+  color: #071f48;
+
+  font-size: 34px;
+  font-weight: 900;
+
+  line-height: 1.1;
+}
+
+.stop-address {
+  color: #173b73;
+
   font-size: 23px;
-  font-weight: 600;
+  font-weight: 700;
+
+  margin-top: 8px;
+
   line-height: 1.25;
 }
 
-.route-arrow {
-  width: 100%;
-  padding: 12px 0;
-  color: #0870df;
+.trip-arrow {
   text-align: center;
-  font-size: 48px;
+
+  color: #0874df;
+
+  font-size: 52px;
   font-weight: 900;
+
+  line-height: 1;
+
+  margin: 3px 0;
 }
 
 /* =========================================================
-   STATUS
+   TRIP STATUS
 ========================================================= */
 
 .trip-status {
-  margin-top: 28px;
-  padding: 0 10px;
-  color: #173765;
-  font-size: 25px;
+  margin-top: 30px;
+
+  color: #173b73;
+
+  font-size: 29px;
+  font-weight: 500;
 }
 
 .trip-status strong {
-  margin-left: 8px;
-  color: #08a91b;
-  font-size: 30px;
+  color: #00a51a;
+
+  font-size: 36px;
   font-weight: 900;
 }
 
 /* =========================================================
-   TRIP BUTTONS
+   DRIVER CONTROL BUTTONS
 ========================================================= */
 
-.trip-buttons {
-  margin-top: 22px;
+.trip-controls {
+  margin-top: 25px;
+
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 20px;
 }
 
-.start-button,
-.coming-button,
-.arrived-button,
-.done-button {
+.trip-button {
   border: 0;
+
+  border-radius: 38px;
+
+  min-height: 115px;
+
   color: white;
+
+  font-size: 31px;
   font-weight: 900;
-  box-shadow: 0 7px 18px rgba(0, 0, 0, 0.14);
+
+  cursor: pointer;
+
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.12);
+
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.trip-button:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 12px 25px rgba(0, 0, 0, 0.18);
+}
+
+.trip-button:active {
+  transform: scale(0.98);
 }
 
 .start-button {
-  width: 100%;
-  min-height: 110px;
-  border-radius: 60px;
-  background: #06b915;
-  font-size: 38px;
-}
+  grid-column: 1 / -1;
 
-.two-buttons {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin-top: 20px;
-}
+  background: #00bd12;
 
-.coming-button,
-.arrived-button {
-  min-height: 115px;
-  border-radius: 58px;
-  font-size: 34px;
+  min-height: 120px;
 }
 
 .coming-button {
-  background: #0b68df;
+  background: #1267db;
 }
 
 .arrived-button {
-  background: #ff8a00;
+  background: #ff8500;
 }
 
 .done-button {
-  width: 100%;
-  min-height: 115px;
-  margin-top: 20px;
-  border-radius: 58px;
-  background: #970bd9;
-  font-size: 38px;
+  grid-column: 1 / -1;
+
+  background: linear-gradient(
+    90deg,
+    #9b00e8,
+    #8500d8
+  );
 }
 
 /* =========================================================
    PUBLIC MESSAGE
 ========================================================= */
 
-.public-message-card {
+.public-message {
+  margin-top: 30px;
+
+  border: 4px solid #b8cce5;
+
+  border-radius: 35px;
+
+  background: #f5f9ff;
+
+  padding: 25px 30px;
+
   display: flex;
   align-items: center;
-  gap: 24px;
-  margin-top: 30px;
-  padding: 28px 32px;
-  border: 4px solid #b9cee7;
-  border-radius: 34px;
-  background:
-    linear-gradient(
-      100deg,
-      #f4f9ff,
-      #e9f3ff
-    );
+
+  gap: 25px;
 }
 
-.message-big-icon {
-  font-size: 58px;
+.public-message-icon {
+  font-size: 55px;
 }
 
-.public-message-card h3 {
-  margin: 0;
-  color: #0b459c;
-  font-size: 30px;
+.public-message-content {
+  flex: 1;
+}
+
+.public-message-title {
+  color: #0d47a1;
+
+  font-size: 28px;
   font-weight: 900;
+
+  margin-bottom: 8px;
 }
 
-.public-message-card p {
-  margin: 8px 0 0;
-  color: #173765;
-  font-size: 22px;
-  font-weight: 600;
+.public-message-text {
+  color: #173b73;
+
+  font-size: 23px;
+  font-weight: 700;
+
   line-height: 1.35;
 }
 
 /* =========================================================
-   DASHBOARD SECTIONS
+   PLACES CARD
 ========================================================= */
 
-.dashboard-section {
-  margin-top: 28px;
-  padding: 38px 34px;
+.dashboard-card {
   background: white;
+
   border-radius: 38px;
+
+  padding: 45px;
+
+  margin-top: 30px;
+
   box-shadow:
-    0 12px 35px rgba(36, 80, 130, 0.12);
+    0 10px 35px rgba(31, 76, 125, 0.10);
 }
 
 .section-heading {
   display: flex;
   align-items: center;
   gap: 18px;
-  margin-bottom: 25px;
-}
 
-.section-heading span {
-  font-size: 55px;
-}
+  color: #0d47a1;
 
-.section-heading h2 {
-  margin: 0;
-  color: #0b459c;
-  font-size: 44px;
-  font-weight: 950;
+  font-size: 48px;
+  font-weight: 900;
+
+  margin-bottom: 35px;
 }
 
 /* =========================================================
-   PLACES
+   PLACE LIST
 ========================================================= */
 
-.place-list {
-  width: 100%;
-}
-
 .place-row {
-  display: flex;
+  display: grid;
+
+  grid-template-columns: 70px 1fr 60px;
+
   align-items: center;
-  justify-content: space-between;
+
   gap: 20px;
-  padding: 24px 8px;
-  border-bottom: 2px solid #dbe5f2;
+
+  padding: 22px 5px;
+
+  border-bottom: 1px solid #d8e2ee;
 }
 
-.place-row label {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 25px;
+.place-row:last-child {
+  border-bottom: 0;
+}
+
+.place-checkbox {
+  width: 34px;
+  height: 34px;
+
   cursor: pointer;
 }
 
-.place-row input[type="checkbox"] {
-  width: 34px;
-  height: 34px;
-  flex: 0 0 auto;
+.place-info {
+  min-width: 0;
 }
 
-.place-row label span {
-  display: flex;
-  flex-direction: column;
-}
+.place-name {
+  color: #102f5f;
 
-.place-row strong {
-  color: #102b55;
-  font-size: 27px;
+  font-size: 30px;
   font-weight: 900;
 }
 
-.place-row small {
-  margin-top: 5px;
-  color: #4f6688;
-  font-size: 21px;
+.place-address {
+  color: #61789b;
+
+  font-size: 22px;
+  font-weight: 600;
+
+  margin-top: 4px;
+
   line-height: 1.3;
 }
 
-.delete-button {
+.delete-place {
   border: 0;
-  background: transparent;
-  font-size: 35px;
-  padding: 8px;
-}
 
-.empty-box {
-  padding: 25px;
-  border-radius: 15px;
-  background: #edf5ff;
-  color: #4f6688;
-  text-align: center;
-  font-size: 19px;
+  background: transparent;
+
+  font-size: 38px;
+
+  cursor: pointer;
 }
 
 /* =========================================================
@@ -761,875 +659,644 @@ a {
 
 .add-place-form {
   display: grid;
+
   grid-template-columns: 1fr 1fr auto;
+
   gap: 12px;
+
+  margin-top: 20px;
 }
 
-.add-place-form input,
-#letters input,
-#letters textarea {
-  width: 100%;
-  border: 2px solid #b9cce3;
-  border-radius: 14px;
-  padding: 17px;
-  color: #102b55;
-  background: white;
+.add-place-form input {
+  min-height: 58px;
+
+  border: 2px solid #b8c9dc;
+
+  border-radius: 12px;
+
+  padding: 12px 15px;
+
   font-size: 18px;
+
+  outline: none;
 }
 
-.add-place-form button {
+.add-place-form input:focus {
+  border-color: #1267db;
+}
+
+.add-place-button {
+  min-height: 58px;
+
   border: 0;
-  border-radius: 14px;
-  padding: 17px 22px;
-  background: #0b459c;
+
+  border-radius: 15px;
+
+  background: #1267db;
+
   color: white;
-  font-size: 17px;
+
+  padding: 0 25px;
+
+  font-size: 18px;
   font-weight: 900;
+
+  cursor: pointer;
 }
 
 /* =========================================================
    TRIP PLANS
 ========================================================= */
 
-.dashboard-section p {
-  color: #304d74;
-  font-size: 19px;
-  line-height: 1.5;
-}
-
-.selected-count {
-  display: inline-block;
-  margin-top: 10px;
-  padding: 12px 18px;
-  border-radius: 30px;
-  background: #e3efff;
-  color: #0b459c;
-  font-size: 18px;
-  font-weight: 800;
-}
-
-/* =========================================================
-   LETTERS
-========================================================= */
-
-#letters {
-  display: grid;
+.trip-plan-list {
+  display: flex;
+  flex-direction: column;
   gap: 14px;
 }
 
-#letters .section-heading {
-  margin-bottom: 5px;
+.trip-plan-item {
+  background: #f0f6fd;
+
+  border-radius: 18px;
+
+  padding: 20px;
+
+  font-size: 20px;
+  font-weight: 700;
 }
 
-#letters textarea {
-  min-height: 150px;
-  resize: vertical;
+/* =========================================================
+   NOTIFICATIONS / LETTERS
+========================================================= */
+
+.notification-card,
+.letter-card {
+  background: #f5f9ff;
+
+  border: 2px solid #c5d6e9;
+
+  border-radius: 25px;
+
+  padding: 25px;
+
+  margin-bottom: 20px;
 }
 
-.message-button {
-  width: 100%;
-  border: 0;
-  border-radius: 15px;
-  padding: 17px;
-  background: #0b459c;
-  color: white;
-  font-size: 18px;
+.notification-title,
+.letter-title {
+  color: #0d47a1;
+
+  font-size: 26px;
   font-weight: 900;
+
+  margin-bottom: 10px;
+}
+
+.notification-message,
+.letter-message {
+  color: #173b73;
+
+  font-size: 20px;
+
+  line-height: 1.5;
 }
 
 /* =========================================================
    SETTINGS
 ========================================================= */
 
-.public-view-button,
-.signout-button {
-  display: block;
-  width: 100%;
-  margin-top: 12px;
-  padding: 17px;
-  border-radius: 15px;
-  text-align: center;
-  font-size: 18px;
-  font-weight: 900;
+.settings-card {
+  background: #f5f9ff;
+
+  border-radius: 25px;
+
+  padding: 25px;
 }
 
-.public-view-button {
-  background: #08b91a;
-  color: white;
+.settings-row {
+  display: flex;
+  justify-content: space-between;
+
+  padding: 18px 0;
+
+  border-bottom: 1px solid #d4dfeb;
+
+  font-size: 20px;
 }
 
-.signout-button {
-  border: 0;
-  background: #e72929;
-  color: white;
+.settings-row:last-child {
+  border-bottom: 0;
 }
 
 /* =========================================================
-   BOTTOM NAV
+   BOTTOM NAVIGATION
 ========================================================= */
 
 .bottom-nav {
-  position: fixed;
-  z-index: 100;
-  left: 0;
-  right: 0;
-  bottom: 0;
-
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-
-  min-height: 105px;
-  padding: 8px 10px;
-
-  background: white;
-
-  border-radius: 38px 38px 0 0;
-
-  box-shadow:
-    0 -8px 30px rgba(20, 55, 100, 0.16);
-}
-
-.bottom-nav a {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  color: #102b55;
-
-  border-right: 2px solid #d6e0ed;
-
-  text-align: center;
-}
-
-.bottom-nav a:last-child {
-  border-right: 0;
-}
-
-.bottom-nav span {
-  font-size: 34px;
-  line-height: 1;
-}
-
-.bottom-nav strong {
-  margin-top: 6px;
-  font-size: 17px;
-  font-weight: 900;
+  display: none;
 }
 
 /* =========================================================
-   PUBLIC VIEW
+   MOBILE
 ========================================================= */
 
-.public-page {
-  min-height: 100vh;
-  background: #edf5ff;
-  padding-bottom: 30px;
-}
-
-.public-header {
-  min-height: 150px;
-  padding: 30px 40px;
-  background: #0b459c;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.public-brand {
-  font-size: 30px;
-  font-weight: 900;
-}
-
-.public-subtitle {
-  margin-top: 5px;
-  color: #ffd900;
-  font-size: 24px;
-  font-weight: 900;
-}
-
-.live-badge {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 20px;
-  border-radius: 40px;
-  background: #08b91a;
-  color: white;
-  font-size: 20px;
-  font-weight: 900;
-}
-
-.live-dot {
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  background: #68ff70;
-}
-
-.public-content {
-  width: min(950px, calc(100% - 28px));
-  margin: 30px auto;
-}
-
-.trip-card {
-  padding: 35px;
-  background: white;
-  border-radius: 35px;
-  box-shadow: 0 12px 35px rgba(36, 80, 130, 0.13);
-}
-
-.trip-heading {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 35px;
-}
-
-.trip-heading-icon {
-  font-size: 55px;
-}
-
-.trip-heading h1 {
-  margin: 0;
-  color: #0b459c;
-  font-size: 60px;
-  font-weight: 950;
-}
-
-.trip-heading p {
-  margin: 8px 0 0;
-  font-size: 20px;
-  font-weight: 700;
-}
-
-.public-stop {
-  padding: 24px;
-  border-radius: 28px;
-}
-
-.current-stop {
-  background: #c9f4d2;
-}
-
-.next-stop {
-  background: #c9e0fb;
-}
-
-.stop-label {
-  display: inline-block;
-  padding: 9px 18px;
-  border-radius: 30px;
-  color: white;
-  font-size: 17px;
-  font-weight: 900;
-}
-
-.green-label {
-  background: #08b91a;
-}
-
-.blue-label {
-  background: #0869df;
-}
-
-.stop-info {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  margin-top: 12px;
-}
-
-.stop-info h2 {
-  margin: 0;
-  color: #081e43;
-  font-size: 30px;
-  font-weight: 900;
-}
-
-.stop-info p {
-  margin: 6px 0 0;
-  color: #173765;
-  font-size: 20px;
-  font-weight: 600;
-}
-
-.down-arrow {
-  padding: 10px;
-  color: #0870df;
-  text-align: center;
-  font-size: 45px;
-  font-weight: 900;
-}
-
-.public-message {
-  display: flex;
-  gap: 20px;
-  margin-top: 25px;
-  padding: 25px;
-  border: 3px solid #b9cee7;
-  border-radius: 28px;
-  background: #f3f8ff;
-}
-
-.message-icon {
-  font-size: 45px;
-}
-
-.public-message h3 {
-  margin: 0;
-  color: #0b459c;
-  font-size: 24px;
-  font-weight: 900;
-}
-
-.public-message p {
-  margin: 8px 0 0;
-  font-size: 19px;
-  line-height: 1.4;
-}
-
-.message-address {
-  font-weight: 800;
-}
-
-.no-trip-card {
-  width: min(700px, calc(100% - 30px));
-  margin: 60px auto;
-  padding: 50px 25px;
-  background: white;
-  border-radius: 30px;
-  text-align: center;
-}
-
-.no-trip-card .big-icon {
-  font-size: 70px;
-}
-
-.no-trip-card h1 {
-  color: #0b459c;
-  font-size: 38px;
-}
-
-.no-trip-card p {
-  font-size: 19px;
-  color: #4f6688;
-}
-
-.public-home-button {
-  display: block;
-  width: fit-content;
-  margin: 20px auto;
-  padding: 15px 24px;
-  border-radius: 15px;
-  background: #0b459c;
-  color: white;
-  font-weight: 900;
-}
-
-/* =========================================================
-   TABLET
-========================================================= */
-
-@media (max-width: 800px) {
-  .driver-header {
-    min-height: 205px;
-    padding: 35px 25px;
-  }
-
-  .brand-text {
-    font-size: 25px;
-  }
-
-  .brand-text span {
-    font-size: 24px;
-  }
-
-  .car-logo {
-    font-size: 45px;
-  }
-
-  .menu-button {
-    font-size: 50px;
-  }
-
-  .hero-image {
-    height: 360px;
-  }
-
-  .trip-title h1 {
-    font-size: 56px;
-  }
-
-  .trip-title p {
-    font-size: 21px;
-  }
-
-  .live-pill {
-    font-size: 19px;
-    padding: 12px 18px;
-  }
-
-  .route-stop {
-    grid-template-columns: 65px 1fr;
-  }
-
-  .route-card {
-    padding: 18px 20px;
-  }
-
-  .route-info h2 {
-    font-size: 27px;
-  }
-
-  .route-info p {
-    font-size: 19px;
-  }
-
-  .start-button {
-    font-size: 32px;
-  }
-
-  .coming-button,
-  .arrived-button,
-  .done-button {
-    font-size: 28px;
-  }
-
-  .add-place-form {
-    grid-template-columns: 1fr;
-  }
-
-  .bottom-nav {
-    min-height: 95px;
-  }
-
-  .bottom-nav span {
-    font-size: 30px;
-  }
-
-  .bottom-nav strong {
-    font-size: 15px;
-  }
-}
-
-/* =========================================================
-   PHONE
-========================================================= */
-
-@media (max-width: 600px) {
+@media (max-width: 700px) {
 
   body {
-    overflow-x: hidden;
+    background: #eaf3fc;
   }
 
-  .driver-page {
-    padding-bottom: 100px;
-  }
-
-  /* HEADER */
+  /* ---------- HEADER ---------- */
 
   .driver-header {
-    min-height: 195px;
-    padding: 28px 20px;
+    min-height: 245px;
+
+    padding:
+      25px
+      25px
+      35px;
+
+    align-items: center;
   }
 
   .driver-brand {
-    gap: 12px;
+    gap: 18px;
   }
 
-  .car-logo {
-    font-size: 37px;
+  .driver-car {
+    font-size: 48px;
   }
 
-  .brand-text {
-    font-size: 21px;
-    line-height: 1.15;
+  .driver-title {
+    font-size: 27px;
+
+    line-height: 1.05;
+
+    max-width: 300px;
   }
 
-  .brand-text span {
-    margin-top: 5px;
-    font-size: 23px;
+  .driver-subtitle {
+    font-size: 29px;
+
+    margin-top: 8px;
+  }
+
+  .driver-header-right {
+    gap: 18px;
   }
 
   .notification-bell {
-    font-size: 32px;
-  }
-
-  .notification-bell span {
-    min-width: 28px;
-    height: 28px;
-    font-size: 13px;
-  }
-
-  .menu-button {
-    font-size: 45px;
-  }
-
-  .header-actions {
-    gap: 12px;
-  }
-
-  .mobile-menu {
-    top: 195px;
-    right: 12px;
-    width: 250px;
-  }
-
-  /* HERO */
-
-  .hero-image {
-    height: 300px;
-  }
-
-  /* MAIN */
-
-  .driver-content {
-    width: calc(100% - 14px);
-    margin-top: 14px;
-  }
-
-  .your-trip-card {
-    padding: 25px 14px 22px;
-    border-radius: 28px;
-  }
-
-  /* TRIP TITLE */
-
-  .trip-top {
-    display: block;
-    margin-bottom: 25px;
-  }
-
-  .trip-title {
-    gap: 10px;
-  }
-
-  .route-icon {
     font-size: 40px;
   }
 
-  .trip-title h1 {
-    font-size: 47px;
-    letter-spacing: -1px;
-  }
+  .notification-count {
+    width: 32px;
+    height: 32px;
 
-  .trip-title p {
-    margin-top: 9px;
-    font-size: 18px;
-    line-height: 1.2;
-  }
-
-  .live-pill {
-    width: fit-content;
-    margin-top: 15px;
-    margin-left: auto;
-    padding: 10px 17px;
     font-size: 17px;
   }
 
-  .live-pill span {
-    width: 14px;
-    height: 14px;
+  .menu-button {
+    font-size: 49px;
   }
 
-  /* ROUTE */
+  /* ---------- DESKTOP NAV HIDDEN ---------- */
 
-  .route-stop {
-    grid-template-columns: 42px 1fr;
-    gap: 8px;
+  .desktop-nav {
+    display: none;
   }
 
-  .route-dot {
-    width: 38px;
-    height: 38px;
-    margin-left: 5px;
-    border-width: 6px;
-    box-shadow:
-      0 0 0 5px currentColor;
+  /* ---------- DASHBOARD ---------- */
+
+  .dashboard {
+    padding:
+      35px
+      14px
+      125px;
+
+    width: 100%;
   }
 
-  .route-card {
-    min-height: 110px;
-    padding: 14px 15px;
-    border-radius: 25px;
+  /* ---------- HERO ---------- */
+
+  .trip-hero {
+    border-radius: 34px;
+
+    padding:
+      40px
+      25px
+      45px;
+
+    margin-bottom: 25px;
   }
 
-  .route-label {
-    padding: 7px 14px;
-    font-size: 14px;
+  .trip-hero-top {
+    display: block;
   }
 
-  .route-info {
-    gap: 9px;
+  .trip-title-row {
+    gap: 12px;
+
+    align-items: center;
   }
 
-  .house-icon,
-  .flag-icon {
-    font-size: 38px;
+  .trip-map-icon {
+    font-size: 48px;
   }
 
-  .route-info h2 {
-    font-size: 23px;
+  .trip-title {
+    font-size: 62px;
+
+    letter-spacing: -2px;
   }
 
-  .route-info p {
-    font-size: 16px;
+  .trip-subtitle {
+    margin-left: 60px;
+
+    margin-top: 15px;
+
+    font-size: 22px;
+
     line-height: 1.25;
   }
 
-  .route-arrow {
-    font-size: 37px;
-    padding: 5px 0;
+  .live-badge {
+    margin-top: 30px;
+
+    margin-left: auto;
+
+    width: fit-content;
+
+    font-size: 22px;
+
+    padding: 15px 25px;
   }
 
-  /* STATUS */
+  .live-dot {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* ---------- TRIP FLOW ---------- */
+
+  .trip-flow {
+    margin-top: 40px;
+  }
+
+  .trip-stop {
+    gap: 12px;
+
+    align-items: center;
+  }
+
+  .trip-circle {
+    width: 60px;
+    height: 60px;
+
+    min-width: 60px;
+
+    border-width: 8px;
+  }
+
+  .trip-stop-card {
+    min-height: 145px;
+
+    border-radius: 30px;
+
+    padding:
+      22px
+      18px;
+
+    gap: 12px;
+  }
+
+  .stop-label {
+    font-size: 18px;
+
+    padding:
+      9px
+      20px;
+  }
+
+  .stop-main {
+    gap: 12px;
+
+    align-items: center;
+  }
+
+  .stop-icon {
+    font-size: 45px;
+
+    min-width: 50px;
+  }
+
+  .stop-name {
+    font-size: 28px;
+  }
+
+  .stop-address {
+    font-size: 18px;
+
+    line-height: 1.3;
+
+    word-break: normal;
+  }
+
+  .trip-arrow {
+    font-size: 45px;
+
+    margin: 4px 0;
+  }
+
+  /* ---------- STATUS ---------- */
 
   .trip-status {
-    margin-top: 18px;
-    font-size: 19px;
+    font-size: 23px;
+
+    margin-top: 25px;
   }
 
   .trip-status strong {
-    font-size: 22px;
+    font-size: 30px;
   }
 
-  /* BUTTONS */
+  /* ---------- BUTTONS ---------- */
+
+  .trip-controls {
+    gap: 16px;
+
+    margin-top: 20px;
+  }
+
+  .trip-button {
+    min-height: 105px;
+
+    border-radius: 35px;
+
+    font-size: 27px;
+  }
 
   .start-button {
-    min-height: 78px;
-    border-radius: 45px;
-    font-size: 25px;
-  }
-
-  .two-buttons {
-    gap: 10px;
-    margin-top: 10px;
+    min-height: 115px;
   }
 
   .coming-button,
   .arrived-button {
-    min-height: 76px;
-    border-radius: 40px;
-    font-size: 20px;
+    min-height: 105px;
   }
 
   .done-button {
-    min-height: 78px;
-    margin-top: 10px;
-    border-radius: 42px;
-    font-size: 26px;
+    min-height: 110px;
   }
 
-  /* MESSAGE */
+  /* ---------- PUBLIC MESSAGE ---------- */
 
-  .public-message-card {
-    gap: 12px;
-    margin-top: 18px;
-    padding: 18px 15px;
-    border-radius: 24px;
-  }
-
-  .message-big-icon {
-    font-size: 40px;
-  }
-
-  .public-message-card h3 {
-    font-size: 21px;
-  }
-
-  .public-message-card p {
-    font-size: 16px;
-  }
-
-  /* SECTIONS */
-
-  .dashboard-section {
-    margin-top: 15px;
-    padding: 25px 15px;
+  .public-message {
     border-radius: 28px;
+
+    padding: 20px;
+
+    gap: 15px;
   }
 
-  .section-heading {
-    gap: 10px;
-    margin-bottom: 18px;
-  }
-
-  .section-heading span {
-    font-size: 40px;
-  }
-
-  .section-heading h2 {
-    font-size: 31px;
-  }
-
-  /* PLACES */
-
-  .place-row {
-    padding: 18px 0;
-    gap: 8px;
-  }
-
-  .place-row label {
-    gap: 12px;
-  }
-
-  .place-row input[type="checkbox"] {
-    width: 28px;
-    height: 28px;
-  }
-
-  .place-row strong {
-    font-size: 21px;
-  }
-
-  .place-row small {
-    font-size: 15px;
-  }
-
-  .delete-button {
-    font-size: 27px;
-  }
-
-  /* ADD PLACE */
-
-  .add-place-form input,
-  #letters input,
-  #letters textarea {
-    font-size: 16px;
-    padding: 14px;
-  }
-
-  .add-place-form button {
-    font-size: 16px;
-    padding: 15px;
-  }
-
-  /* BOTTOM NAV */
-
-  .bottom-nav {
-    min-height: 86px;
-    padding: 5px 2px;
-    border-radius: 28px 28px 0 0;
-  }
-
-  .bottom-nav span {
-    font-size: 26px;
-  }
-
-  .bottom-nav strong {
-    font-size: 12px;
-  }
-
-  /* PUBLIC VIEW */
-
-  .public-header {
-    min-height: 120px;
-    padding: 25px 20px;
-  }
-
-  .public-brand {
-    font-size: 21px;
-  }
-
-  .public-subtitle {
-    font-size: 18px;
-  }
-
-  .live-badge {
-    padding: 9px 13px;
-    font-size: 14px;
-  }
-
-  .public-content {
-    width: calc(100% - 14px);
-    margin: 15px auto;
-  }
-
-  .trip-card {
-    padding: 22px 14px;
-    border-radius: 28px;
-  }
-
-  .trip-heading {
-    gap: 10px;
-  }
-
-  .trip-heading-icon {
-    font-size: 40px;
-  }
-
-  .trip-heading h1 {
+  .public-message-icon {
     font-size: 43px;
   }
 
-  .trip-heading p {
-    font-size: 17px;
-  }
-
-  .public-stop {
-    padding: 17px 14px;
-    border-radius: 24px;
-  }
-
-  .stop-label {
-    font-size: 14px;
-  }
-
-  .stop-info {
-    gap: 9px;
-  }
-
-  .stop-info h2 {
+  .public-message-title {
     font-size: 22px;
   }
 
-  .stop-info p {
-    font-size: 15px;
+  .public-message-text {
+    font-size: 17px;
   }
 
-  .down-arrow {
-    font-size: 35px;
+  /* ---------- OTHER CARDS ---------- */
+
+  .dashboard-card {
+    border-radius: 32px;
+
+    padding:
+      30px
+      20px;
+
+    margin-top: 25px;
+  }
+
+  .section-heading {
+    font-size: 39px;
+
+    gap: 10px;
+
+    margin-bottom: 25px;
+  }
+
+  /* ---------- PLACES ---------- */
+
+  .place-row {
+    grid-template-columns:
+      48px
+      1fr
+      45px;
+
+    gap: 8px;
+
+    padding: 20px 0;
+  }
+
+  .place-checkbox {
+    width: 30px;
+    height: 30px;
+  }
+
+  .place-name {
+    font-size: 25px;
+  }
+
+  .place-address {
+    font-size: 17px;
+  }
+
+  .delete-place {
+    font-size: 32px;
+  }
+
+  /* ---------- ADD PLACE ---------- */
+
+  .add-place-form {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+  }
+
+  .add-place-form input {
+    width: 100%;
+
+    min-height: 55px;
+  }
+
+  .add-place-button {
+    width: 100%;
+  }
+
+  /* ---------- BOTTOM NAV ---------- */
+
+  .bottom-nav {
+    position: fixed;
+
+    display: grid;
+
+    grid-template-columns:
+      repeat(5, 1fr);
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    height: 112px;
+
+    background: white;
+
+    border-radius:
+      35px
+      35px
+      0
+      0;
+
+    box-shadow:
+      0 -8px 25px rgba(20, 60, 100, 0.18);
+
+    z-index: 1000;
+
+    padding:
+      8px
+      5px
+      10px;
+  }
+
+  .bottom-nav a {
+    color: #102f5f;
+
+    text-decoration: none;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-align: center;
+
+    font-weight: 900;
+
+    font-size: 16px;
+
+    border-right: 1px solid #d4dfeb;
+  }
+
+  .bottom-nav a:last-child {
+    border-right: 0;
+  }
+
+  .bottom-nav-icon {
+    font-size: 37px;
+
+    line-height: 1;
+
+    margin-bottom: 5px;
+  }
+
+  .bottom-nav-label {
+    font-size: 16px;
+
+    line-height: 1.1;
   }
 }
 
 /* =========================================================
-   VERY SMALL PHONES
+   SMALL PHONES
 ========================================================= */
 
-@media (max-width: 380px) {
+@media (max-width: 400px) {
 
-  .brand-text {
-    font-size: 18px;
+  .driver-header {
+    min-height: 220px;
+
+    padding: 22px 18px;
   }
 
-  .brand-text span {
-    font-size: 20px;
+  .driver-title {
+    font-size: 23px;
   }
 
-  .trip-title h1 {
+  .driver-subtitle {
+    font-size: 25px;
+  }
+
+  .driver-car {
     font-size: 40px;
   }
 
-  .trip-title p {
+  .menu-button {
+    font-size: 43px;
+  }
+
+  .trip-hero {
+    padding:
+      32px
+      18px
+      35px;
+  }
+
+  .trip-title {
+    font-size: 50px;
+  }
+
+  .trip-subtitle {
+    font-size: 19px;
+    margin-left: 48px;
+  }
+
+  .trip-stop-card {
+    padding: 18px 14px;
+  }
+
+  .stop-name {
+    font-size: 24px;
+  }
+
+  .stop-address {
     font-size: 16px;
   }
 
-  .route-info h2 {
-    font-size: 20px;
+  .stop-icon {
+    font-size: 38px;
   }
 
-  .route-info p {
+  .trip-circle {
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    border-width: 7px;
+  }
+
+  .trip-button {
+    font-size: 22px;
+  }
+
+  .bottom-nav {
+    height: 105px;
+  }
+
+  .bottom-nav-icon {
+    font-size: 32px;
+  }
+
+  .bottom-nav-label {
     font-size: 14px;
-  }
-
-  .coming-button,
-  .arrived-button {
-    font-size: 17px;
-  }
-
-  .bottom-nav strong {
-    font-size: 10px;
   }
 }
