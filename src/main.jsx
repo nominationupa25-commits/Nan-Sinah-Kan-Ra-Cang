@@ -1134,6 +1134,9 @@ if (status === "coming") {
     setSaving(false);
 
     await loadData();
+setPage("current-trip");
+
+    
   }
 
   /* =======================================================
