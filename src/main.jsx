@@ -271,7 +271,7 @@ const originalEtaMinutes = Number(
 );
 
 const etaStartedAt = displayStop?.eta_started_at
-  ? new Date(currentStop.eta_started_at).getTime()
+  ? new Date(displayStop.eta_started_at).getTime()
   : null;
 
 const elapsedMinutes = etaStartedAt
