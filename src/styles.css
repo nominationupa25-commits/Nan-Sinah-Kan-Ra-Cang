@@ -889,8 +889,7 @@ a {
     0 -8px 30px rgba(20, 55, 100, 0.16);
 }
 
-.bottom-nav a {
-  display: flex;
+.bottom-nav button {  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -902,12 +901,11 @@ a {
   text-align: center;
 }
 
-.bottom-nav a:last-child {
-  border-right: 0;
+.bottom-nav button:last-child {
+   border-right: 0;
 }
 
-.bottom-nav span {
-  font-size: 34px;
+.bottom-nav-icon {  font-size: 34px;
   line-height: 1;
 }
 
