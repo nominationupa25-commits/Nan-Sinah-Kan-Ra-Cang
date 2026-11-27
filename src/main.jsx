@@ -255,7 +255,21 @@ function PublicView() {
    * eta_minutes is the number of minutes remaining
    * for the current stop.
    */
-  const originalEtaMinutes = Number(
+/*
+ * ARRIVAL TIME
+ *
+ * eta_minutes is the number of minutes remaining
+ * for the current stop.
+ */
+const completedStop = [...stops]
+  .reverse()
+  .find((stop) => stop.status === "completed");
+
+// Keep the completed house visible until the next
+// house becomes CURRENT / COMING / ARRIVED.
+const displayStop = currentStop || completedStop;
+
+const originalEtaMinutes = Number(
   displayStop?.eta_minutes
 );
 
