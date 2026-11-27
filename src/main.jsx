@@ -265,8 +265,13 @@ function PublicView() {
         <div className="no-trip-card">
           <div className="big-icon">🚗</div>
 
-          <h1>NO ACTIVE TRIP</h1>
+          <h1>Zaan Vahnak Kan Thawk Rih Lo</h1>
 
+          {trip?.trip_title && (
+  <h2 className="trip-route-title">
+    {trip.trip_title}
+  </h2>
+)}
           <p>
             The driver has not started a trip yet.
           </p>
@@ -1453,6 +1458,27 @@ src="https://raw.githubusercontent.com/nominationupa25-commits/Nan-Sinah-Kan-Ra-
                 ✓ DONE
               </button>
 
+              <button
+  className="edit-trip-button"
+  type="button"
+  onClick={() => {
+    setEditingTrip(true);
+
+    setEditSelectedPlaces(
+      stops
+        .filter(
+          (stop) =>
+            !["completed", "current", "coming", "arrived"]
+              .includes(stop.status)
+        )
+        .map((stop) => stop.place_id)
+    );
+  }}
+  disabled={saving || !trip}
+>
+  ✏️ EDIT TRIP
+</button>
+
             </div>
 
             {/* PUBLIC MESSAGE */}
@@ -1571,6 +1597,192 @@ src="https://raw.githubusercontent.com/nominationupa25-commits/Nan-Sinah-Kan-Ra-
             >
               ▶ START TRIP
             </button>
+
+            {editingTrip && (
+  <div className="edit-trip-card">
+
+    <h2>✏️ EDIT TRIP</h2>
+
+    <label>
+      TRIP TITLE / WHERE TO WHERE
+    </label>
+
+    <input
+      type="text"
+      value={tripTitle}
+      onChange={(e) =>
+        setTripTitle(e.target.value)
+      }
+      placeholder="Example: Charlotte → Raleigh"
+    />
+
+    <h3>
+      REMAINING STOPS
+    </h3>
+
+    <div className="place-list">
+
+      {places.map((place) => {
+
+        const currentPlaceId =
+          currentStop?.place_id;
+
+        if (place.id === currentPlaceId) {
+          return null;
+        }
+
+        return (
+          <label
+            className="place-row"
+            key={place.id}
+          >
+
+            <input
+              type="checkbox"
+              checked={editSelectedPlaces.includes(
+                place.id
+              )}
+              onChange={() => {
+
+                setEditSelectedPlaces((old) => {
+
+                  if (old.includes(place.id)) {
+                    return old.filter(
+                      (id) =>
+                        id !== place.id
+                    );
+                  }
+
+                  return [
+                    ...old,
+                    place.id,
+                  ];
+                });
+
+              }}
+            />
+
+            <span>
+
+              <strong>
+                {place.name}
+              </strong>
+
+              <small>
+                {place.address}
+              </small>
+
+            </span>
+
+          </label>
+        );
+      })}
+
+    </div>
+
+    <div className="two-buttons">
+
+      <button
+        className="start-button"
+        type="button"
+        disabled={saving}
+        onClick={async () => {
+
+          if (!trip) return;
+
+          setSaving(true);
+
+          const { error: titleError } =
+            await supabase
+              .from("trips")
+              .update({
+                trip_title:
+                  tripTitle.trim(),
+              })
+              .eq("id", trip.id);
+
+          if (titleError) {
+            setSaving(false);
+            alert(titleError.message);
+            return;
+          }
+
+          const currentPlaceId =
+            currentStop?.place_id;
+
+          await supabase
+            .from("trip_stops")
+            .delete()
+            .eq("trip_id", trip.id)
+            .neq(
+              "place_id",
+              currentPlaceId
+            )
+            .in(
+              "status",
+              ["next", "pending"]
+            );
+
+          const remainingStops =
+            editSelectedPlaces
+              .filter(
+                (id) =>
+                  id !== currentPlaceId
+              )
+              .map(
+                (placeId, index) => ({
+                  trip_id: trip.id,
+                  place_id: placeId,
+                  stop_order:
+                    index + 2,
+                  status:
+                    index === 0
+                      ? "next"
+                      : "pending",
+                })
+              );
+
+          if (
+            remainingStops.length > 0
+          ) {
+            const { error } =
+              await supabase
+                .from("trip_stops")
+                .insert(
+                  remainingStops
+                );
+
+            if (error) {
+              setSaving(false);
+              alert(error.message);
+              return;
+            }
+          }
+
+          setSaving(false);
+          setEditingTrip(false);
+
+          await loadData();
+        }}
+      >
+        💾 SAVE TRIP CHANGES
+      </button>
+
+      <button
+        type="button"
+        className="done-button"
+        onClick={() =>
+          setEditingTrip(false)
+        }
+        disabled={saving}
+      >
+        CANCEL
+      </button>
+
+    </div>
+
+  </div>
+)}
 
           </section>
 
