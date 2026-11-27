@@ -1243,7 +1243,10 @@ const nextStop = stops.find((stop) =>
     stop.status
   )
 );
-
+const finalStop =
+  stops.length > 0
+    ? stops[stops.length - 1]
+    : null;
 // If there is no active current stop,
 // show the most recently completed stop.
 // This happens immediately after DONE.
