@@ -2381,20 +2381,107 @@ src="https://raw.githubusercontent.com/nominationupa25-commits/Nan-Sinah-Kan-Ra-
       </button>
 
       <button
-        type="button"
-        className="done-button"
-        onClick={() =>
-          setEditingTrip(false)
-        }
-        disabled={saving}
-      >
-        CANCEL
-      </button>
+  className="start-button"
+  type="button"
+  disabled={saving}
+  onClick={async () => {
 
-    </div>
+    onClick={async () => {
+  if (!trip || !supabase) return;
 
-  </div>
-)}
+  setSaving(true);
+
+  // Save trip title
+  const { error: titleError } =
+    await supabase
+      .from("trips")
+      .update({
+        trip_title: tripTitle.trim(),
+      })
+      .eq("id", trip.id);
+
+  if (titleError) {
+    setSaving(false);
+    alert(titleError.message);
+    return;
+  }
+
+  // Keep the active/current house.
+  const currentPlaceId =
+    currentStop?.place_id || null;
+
+  // These are the houses that should remain
+  // AFTER the current house.
+  const remainingPlaces =
+    editSelectedPlaces.filter(
+      (placeId) =>
+        placeId !== currentPlaceId
+    );
+
+  // Remove the old NEXT/PENDING stops.
+  const { error: deleteError } =
+    await supabase
+      .from("trip_stops")
+      .delete()
+      .eq("trip_id", trip.id)
+      .in("status", ["next", "pending"]);
+
+  if (deleteError) {
+    setSaving(false);
+    alert(
+      "Could not update the trip stops: " +
+      deleteError.message
+    );
+    return;
+  }
+
+  // Re-create the NEXT/PENDING stops
+  // using the selections from EDIT TRIP.
+  const remainingStops =
+    remainingPlaces.map(
+      (placeId, index) => ({
+        trip_id: trip.id,
+        place_id: placeId,
+        stop_order: index + 2,
+        status:
+          index === 0
+            ? "next"
+            : "pending",
+      })
+    );
+
+  if (remainingStops.length > 0) {
+    const { error: insertError } =
+      await supabase
+        .from("trip_stops")
+        .insert(remainingStops);
+
+    if (insertError) {
+      setSaving(false);
+      alert(
+        "Could not save the new trip order: " +
+        insertError.message
+      );
+      return;
+    }
+  }
+
+  // Refresh the trip from Supabase.
+  await loadData();
+
+  // Close edit mode.
+  setEditSelectedPlaces([]);
+  setEditingTrip(false);
+  setSaving(false);
+
+  // Show the updated trip immediately.
+  setPage("current-trip");
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+}}
 
           </section>
 
