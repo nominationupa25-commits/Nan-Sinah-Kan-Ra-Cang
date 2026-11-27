@@ -1526,16 +1526,14 @@ src="https://raw.githubusercontent.com/nominationupa25-commits/Nan-Sinah-Kan-Ra-
 
             <div className="place-list">
 
-              {places.length === 0 ? (
-
+{!Array.isArray(places) || places.length === 0 ? (
                 <div className="empty-box">
                   No places yet.
                 </div>
 
               ) : (
 
-                places.map((place) => (
-
+(Array.isArray(places) ? places : []).map((place) => (
                   <div
                     className="place-row"
                     key={place.id}
