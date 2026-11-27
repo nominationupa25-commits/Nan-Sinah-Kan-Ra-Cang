@@ -248,14 +248,11 @@ function PublicView() {
       stop.status
     )
   );
-
+const finalStop =
+  stops.length > 0
+    ? stops[stops.length - 1]
+    : null;
   /*
-   * ARRIVAL TIME
-   *
-   * eta_minutes is the number of minutes remaining
-   * for the current stop.
-   */
-/*
  * ARRIVAL TIME
  *
  * eta_minutes is the number of minutes remaining
