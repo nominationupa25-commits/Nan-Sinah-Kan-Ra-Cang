@@ -289,17 +289,6 @@ const estimatedArrival =
       )
     : null;
 
-  const hasEta =
-    Number.isFinite(etaMinutes) &&
-    etaMinutes >= 0;
-
-  const estimatedArrival = hasEta
-    ? new Date(
-        now +
-          etaMinutes * 60 * 1000
-      )
-    : null;
-
   const arrivedTime =
     currentStop?.status === "arrived" &&
     currentStop?.updated_at
