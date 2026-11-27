@@ -255,9 +255,39 @@ function PublicView() {
    * eta_minutes is the number of minutes remaining
    * for the current stop.
    */
-  const etaMinutes = Number(
-    currentStop?.eta_minutes
-  );
+  const originalEtaMinutes = Number(
+  currentStop?.eta_minutes
+);
+
+const etaStartedAt = currentStop?.eta_started_at
+  ? new Date(currentStop.eta_started_at).getTime()
+  : null;
+
+const elapsedMinutes = etaStartedAt
+  ? Math.floor(
+      (now - etaStartedAt) / 60000
+    )
+  : 0;
+
+const etaMinutes =
+  Number.isFinite(originalEtaMinutes)
+    ? Math.max(
+        0,
+        originalEtaMinutes - elapsedMinutes
+      )
+    : NaN;
+
+const hasEta =
+  Number.isFinite(etaMinutes) &&
+  etaMinutes >= 0;
+
+const estimatedArrival =
+  hasEta && etaStartedAt
+    ? new Date(
+        etaStartedAt +
+          originalEtaMinutes * 60000
+      )
+    : null;
 
   const hasEta =
     Number.isFinite(etaMinutes) &&
@@ -1040,8 +1070,19 @@ const [editSelectedPlaces, setEditSelectedPlaces] = useState([]);
     /* COMING / ARRIVED */
 
     const stopUpdate = {
-      status,
-    };
+  status,
+};
+
+if (status === "coming") {
+  stopUpdate.eta_minutes =
+    Number(current.eta_minutes) > 0
+      ? Number(current.eta_minutes)
+      : 15;
+
+  stopUpdate.eta_started_at =
+    current.eta_started_at ||
+    new Date().toISOString();
+}
 
     if (
       status === "coming" &&
