@@ -1227,7 +1227,7 @@ async function updateTripStatus(status) {
       await supabase
         .from("trip_stops")
         .update({
-          status: "Nan Inn Kan Phan Cang",
+          status: "arrived",
 
           arrived_at:
             current.arrived_at ||
