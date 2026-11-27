@@ -1194,6 +1194,200 @@ const [editSelectedPlaces, setEditSelectedPlaces] = useState([]);
       ? stops[stops.length - 1]
       : null;
 
+    /* =======================================================
+     AUTOMATIC GPS / ETA TRACKING
+  ======================================================= */
+
+  useEffect(() => {
+    if (
+      !trip ||
+      !currentStop ||
+      currentStop.status === "arrived" ||
+      currentStop.status === "completed" ||
+      !navigator.geolocation ||
+      !supabase
+    ) {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function getDestinationCoordinates() {
+      const place = currentStop.places;
+
+      if (!place) return null;
+
+      /* Use coordinates already saved in places */
+      if (
+        Number.isFinite(Number(place.latitude)) &&
+        Number.isFinite(Number(place.longitude))
+      ) {
+        return {
+          latitude: Number(place.latitude),
+          longitude: Number(place.longitude),
+        };
+      }
+
+      /* If coordinates are missing, find them from the address */
+      if (!place.address) return null;
+
+      try {
+        const response = await fetch(
+          "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=" +
+            encodeURIComponent(place.address)
+        );
+
+        const results = await response.json();
+
+        if (!results?.[0]) {
+          return null;
+        }
+
+        return {
+          latitude: Number(results[0].lat),
+          longitude: Number(results[0].lon),
+        };
+      } catch (error) {
+        console.error(
+          "Could not find destination coordinates:",
+          error
+        );
+
+        return null;
+      }
+    }
+
+    async function updateAutomaticETA(position) {
+      if (cancelled) return;
+
+      const destination =
+        await getDestinationCoordinates();
+
+      if (!destination || cancelled) {
+        return;
+      }
+
+      try {
+        const start =
+          position.coords.longitude +
+          "," +
+          position.coords.latitude;
+
+        const end =
+          destination.longitude +
+          "," +
+          destination.latitude;
+
+        /*
+         * OSRM calculates the driving route.
+         */
+        const routeResponse = await fetch(
+          "https://router.project-osrm.org/route/v1/driving/" +
+            start +
+            ";" +
+            end +
+            "?overview=false"
+        );
+
+        const routeData =
+          await routeResponse.json();
+
+        const route =
+          routeData?.routes?.[0];
+
+        if (!route || cancelled) {
+          return;
+        }
+
+        /* Convert seconds to minutes */
+        const etaMinutes = Math.max(
+          0,
+          Math.ceil(
+            route.duration / 60
+          )
+        );
+
+        /* Convert meters to miles */
+        const distanceMiles =
+          Number(
+            (
+              route.distance / 1609.344
+            ).toFixed(1)
+          );
+
+        /*
+         * Save ETA and distance in Supabase.
+         */
+        const { error } =
+          await supabase
+            .from("trip_stops")
+            .update({
+              eta_minutes:
+                etaMinutes,
+
+              distance_miles:
+                distanceMiles,
+
+              updated_at:
+                new Date().toISOString(),
+            })
+            .eq(
+              "id",
+              currentStop.id
+            );
+
+        if (error) {
+          console.error(
+            "Could not save ETA:",
+            error
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Automatic ETA update failed:",
+          error
+        );
+      }
+    }
+
+    /*
+     * Watch the driver's phone GPS.
+     */
+    const watchId =
+      navigator.geolocation.watchPosition(
+        updateAutomaticETA,
+
+        (error) => {
+          console.error(
+            "GPS location error:",
+            error.message
+          );
+        },
+
+        {
+          enableHighAccuracy: true,
+          maximumAge: 15000,
+          timeout: 20000,
+        }
+      );
+
+    /*
+     * Stop GPS when leaving this trip/current stop.
+     */
+    return () => {
+      cancelled = true;
+
+      navigator.geolocation.clearWatch(
+        watchId
+      );
+    };
+  }, [
+    trip?.id,
+    currentStop?.id,
+    currentStop?.status,
+  ]);
+  
+
   /* =======================================================
      STATUS TEXT
   ======================================================= */
