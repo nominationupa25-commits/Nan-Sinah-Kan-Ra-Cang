@@ -1206,7 +1206,7 @@ function Admin() {
       <section className="hero-image">
 
         <img
-src={`${import.meta.env.BASE_URL}file_00000000af84822fa5abeb2e9ea9ff0d.png`}    
+src={`${import.meta.env.BASE_URL}/IMG-23facfbd13627304b32013e3310ce98f-V.jpg`}    
           alt="Church"
           onError={(e) => {
             e.currentTarget.style.display =
