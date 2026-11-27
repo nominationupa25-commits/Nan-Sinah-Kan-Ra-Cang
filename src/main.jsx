@@ -969,21 +969,49 @@ const [editSelectedPlaces, setEditSelectedPlaces] = useState([]);
      UPDATE TRIP STATUS
   ======================================================= */
 
-  async function updateTripStatus(status) {
+  /* =======================================================
+   UPDATE TRIP STATUS
+   FLOW:
 
-    if (!supabase) return;
+   BEFORE:
+   CURRENT → NEXT → PENDING
 
-    if (!trip) {
+   COMING:
+   CURRENT → COMING + ETA
+   NEXT stays NEXT
 
-      alert(
-        "Start a trip first."
-      );
+   ARRIVED:
+   CURRENT → ARRIVED
+   same house stays ARRIVED
+   NEXT stays NEXT
 
-      return;
-    }
+   DONE:
+   CURRENT → COMPLETED NOW
+   NEXT stays NEXT
 
-    let current =
-  stops.find((stop) =>
+   COMING AGAIN:
+   previous NEXT → CURRENT → COMING + ETA
+   following house → NEXT
+======================================================= */
+
+async function updateTripStatus(status) {
+
+  if (!supabase) {
+    return;
+  }
+
+  if (!trip) {
+    alert("Start a trip first.");
+    return;
+  }
+
+  /*
+   * Find the house currently being worked on.
+   *
+   * After DONE there is no current/coming/arrived stop,
+   * so COMING will automatically select the NEXT stop.
+   */
+  let current = stops.find((stop) =>
     [
       "current",
       "coming",
@@ -991,136 +1019,185 @@ const [editSelectedPlaces, setEditSelectedPlaces] = useState([]);
     ].includes(stop.status)
   );
 
-// If the previous stop was completed,
-// COMING should select the NEXT stop.
-if (!current) {
-  current =
-    stops.find((stop) =>
-      ["next", "pending"].includes(
-        stop.status
-      )
+  /*
+   * After DONE:
+   * select the NEXT house.
+   */
+  if (!current) {
+    current = stops.find((stop) =>
+      [
+        "next",
+        "pending",
+      ].includes(stop.status)
     );
-}
+  }
 
-    if (!current) {
-      alert("There is no current stop.");
+  if (!current) {
+    alert("There is no current or next house.");
+    return;
+  }
+
+  setSaving(true);
+
+  /* =====================================================
+     DONE
+  ===================================================== */
+
+  if (status === "done") {
+
+    const { error: stopError } =
+      await supabase
+        .from("trip_stops")
+        .update({
+          status: "completed",
+          completed_at: new Date().toISOString(),
+        })
+        .eq("id", current.id);
+
+    if (stopError) {
+      setSaving(false);
+      alert(stopError.message);
       return;
     }
 
-    setSaving(true);
+    /*
+     * IMPORTANT:
+     * Do NOT make NEXT current yet.
+     *
+     * NEXT remains NEXT until the driver
+     * presses COMING again.
+     */
+    const next = stops.find((stop) =>
+      [
+        "next",
+        "pending",
+      ].includes(stop.status)
+    );
 
-      /* DONE */
+    if (next) {
 
-if (status === "done") {
+      await supabase
+        .from("trips")
+        .update({
+          status: "active",
+          is_public_active: true,
+        })
+        .eq("id", trip.id);
 
-  const { error: stopError } =
-    await supabase
-      .from("trip_stops")
-      .update({
-        status: "completed",
-        completed_at:
-          new Date().toISOString(),
-      })
-      .eq("id", current.id);
+    } else {
 
-  if (stopError) {
+      /*
+       * No more houses.
+       * Trip is finished.
+       */
+      await supabase
+        .from("trips")
+        .update({
+          status: "completed",
+          is_public_active: false,
+          completed_at: new Date().toISOString(),
+        })
+        .eq("id", trip.id);
+    }
 
     setSaving(false);
 
-    alert(stopError.message);
+    await loadData();
+
+    setPage("current-trip");
 
     return;
   }
 
-  // Do NOT make the next stop CURRENT yet.
-  // The next stop stays NEXT until COMING is pressed.
+  /* =====================================================
+     COMING
+  ===================================================== */
 
-  const next =
-    stops.find((stop) =>
-      ["next", "pending"].includes(
-        stop.status
-      )
-    );
+  if (status === "coming") {
 
-  if (next) {
+    /*
+     * If this is the NEXT house after DONE,
+     * it becomes the new CURRENT house.
+     */
+    const isNextHouse =
+      current.status === "next" ||
+      current.status === "pending";
 
-    await supabase
-      .from("trips")
-      .update({
-        status: "active",
-        is_public_active: true,
-      })
-      .eq("id", trip.id);
+    const eta =
+      Number(current.eta_minutes) > 0
+        ? Number(current.eta_minutes)
+        : 15;
 
-  } else {
+    const comingUpdate = {
+      status: "coming",
 
-    await supabase
-      .from("trips")
-      .update({
-        status: "completed",
-        is_public_active: false,
-        completed_at:
-          new Date().toISOString(),
-      })
-      .eq("id", trip.id);
-  }
+      eta_minutes: eta,
 
-  setSaving(false);
+      eta_started_at:
+        current.eta_started_at ||
+        new Date().toISOString(),
 
-  await loadData();
+      coming_at:
+        current.coming_at ||
+        new Date().toISOString(),
+    };
 
-  setPage("current-trip");
-
-  return;
-}
-
-
-    /* COMING / ARRIVED */
-
-    const stopUpdate = {
-  status,
-};
-
-if (status === "coming") {
-  stopUpdate.eta_minutes =
-    Number(current.eta_minutes) > 0
-      ? Number(current.eta_minutes)
-      : 15;
-
-  stopUpdate.eta_started_at =
-    current.eta_started_at ||
-    new Date().toISOString();
-}
-
-    if (
-      status === "coming" &&
-      !current.coming_at
-    ) {
-      stopUpdate.coming_at =
-        new Date().toISOString();
-    }
-
-    if (
-      status === "arrived" &&
-      !current.arrived_at
-    ) {
-      stopUpdate.arrived_at =
-        new Date().toISOString();
-    }
-
-    const { error } =
+    const { error: comingError } =
       await supabase
         .from("trip_stops")
-        .update(stopUpdate)
+        .update(comingUpdate)
         .eq("id", current.id);
 
-    if (error) {
+    if (comingError) {
 
       setSaving(false);
 
-      alert(error.message);
+      alert(comingError.message);
 
       return;
+    }
+
+    /*
+     * If this was NEXT, it is now the CURRENT
+     * active house.
+     *
+     * The following house remains NEXT.
+     *
+     * We only need the status on the stop itself;
+     * the UI determines CURRENT from the active
+     * coming/arrived/current stop.
+     */
+    if (isNextHouse) {
+
+      /*
+       * Find the following house.
+       */
+      const followingStop = stops
+        .filter((stop) =>
+          stop.id !== current.id &&
+          [
+            "next",
+            "pending",
+          ].includes(stop.status)
+        )
+        .sort(
+          (a, b) =>
+            Number(a.stop_order) -
+            Number(b.stop_order)
+        )[0];
+
+      /*
+       * Keep the following house as NEXT.
+       */
+      if (followingStop) {
+
+        await supabase
+          .from("trip_stops")
+          .update({
+            status: "next",
+          })
+          .eq("id", followingStop.id);
+      }
     }
 
     await supabase
@@ -1134,10 +1211,97 @@ if (status === "coming") {
     setSaving(false);
 
     await loadData();
-setPage("current-trip");
 
-    
+    setPage("current-trip");
+
+    return;
   }
+
+  /* =====================================================
+     ARRIVED
+  ===================================================== */
+
+  if (status === "arrived") {
+
+    const { error: arrivedError } =
+      await supabase
+        .from("trip_stops")
+        .update({
+          status: "arrived",
+
+          arrived_at:
+            current.arrived_at ||
+            new Date().toISOString(),
+        })
+        .eq("id", current.id);
+
+    if (arrivedError) {
+
+      setSaving(false);
+
+      alert(arrivedError.message);
+
+      return;
+    }
+
+    /*
+     * Keep the same house as ARRIVED.
+     * Do not change NEXT.
+     */
+    await supabase
+      .from("trips")
+      .update({
+        status: "active",
+        is_public_active: true,
+      })
+      .eq("id", trip.id);
+
+    setSaving(false);
+
+    await loadData();
+
+    setPage("current-trip");
+
+    return;
+  }
+
+  /* =====================================================
+     CURRENT / OTHER STATUS
+  ===================================================== */
+
+  const { error } =
+    await supabase
+      .from("trip_stops")
+      .update({
+        status: status,
+      })
+      .eq("id", current.id);
+
+  if (error) {
+
+    setSaving(false);
+
+    alert(error.message);
+
+    return;
+  }
+
+  await supabase
+    .from("trips")
+    .update({
+      status: "active",
+      is_public_active: true,
+    })
+    .eq("id", trip.id);
+
+  setSaving(false);
+
+  await loadData();
+
+  setPage("current-trip");
+}
+
+        
 
   /* =======================================================
      PUBLIC MESSAGE
