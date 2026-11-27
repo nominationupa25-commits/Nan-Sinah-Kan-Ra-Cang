@@ -419,6 +419,10 @@ function Admin() {
 
   const [selectedPlaces, setSelectedPlaces] = useState([]);
 
+  const [tripTitle, setTripTitle] = useState("");
+const [editingTrip, setEditingTrip] = useState(false);
+const [editSelectedPlaces, setEditSelectedPlaces] = useState([]);
+
   const [messageTitle, setMessageTitle] = useState("");
   const [messageText, setMessageText] = useState("");
   const [messageAddress, setMessageAddress] = useState("");
