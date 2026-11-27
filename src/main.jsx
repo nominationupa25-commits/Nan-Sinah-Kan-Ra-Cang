@@ -123,11 +123,22 @@ function AdminLogin() {
    PUBLIC VIEW
 ========================================================= */
 
+
 function PublicView() {
   const [trip, setTrip] = useState(null);
   const [stops, setStops] = useState([]);
   const [notification, setNotification] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [now, setNow] = useState(Date.now());
+
+  // Refresh the displayed ETA every 30 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(Date.now());
+    }, 30000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   async function loadPublicTrip() {
     if (!supabase) {
@@ -227,25 +238,79 @@ function PublicView() {
   }, []);
 
   const currentStop = stops.find((stop) =>
-    ["current", "coming", "arrived"].includes(stop.status)
+    ["current", "coming", "arrived"].includes(
+      stop.status
+    )
   );
 
   const nextStop = stops.find((stop) =>
-    ["next", "pending"].includes(stop.status)
+    ["next", "pending"].includes(
+      stop.status
+    )
   );
+
+  /*
+   * ARRIVAL TIME
+   *
+   * eta_minutes is the number of minutes remaining
+   * for the current stop.
+   */
+  const etaMinutes = Number(
+    currentStop?.eta_minutes
+  );
+
+  const hasEta =
+    Number.isFinite(etaMinutes) &&
+    etaMinutes >= 0;
+
+  const estimatedArrival = hasEta
+    ? new Date(
+        now +
+          etaMinutes * 60 * 1000
+      )
+    : null;
+
+  const arrivedTime =
+    currentStop?.status === "arrived" &&
+    currentStop?.updated_at
+      ? new Date(
+          currentStop.updated_at
+        )
+      : null;
+
+  const arrivalTime =
+    arrivedTime ||
+    estimatedArrival;
+
+  function formatArrivalTime(date) {
+    if (!date) return "";
+
+    return date.toLocaleTimeString(
+      [],
+      {
+        hour: "numeric",
+        minute: "2-digit",
+      }
+    );
+  }
 
   if (loading) {
     return (
       <div className="loading-page">
-        <div>Loading Public View...</div>
+        <div>
+          Loading Public View...
+        </div>
       </div>
     );
   }
 
   return (
     <div className="public-page">
+
       <header className="public-header">
+
         <div>
+
           <div className="public-brand">
             NAN SINAH KAN RA CANG
           </div>
@@ -253,49 +318,85 @@ function PublicView() {
           <div className="public-subtitle">
             PUBLIC VIEW
           </div>
+
         </div>
 
         <div className="live-badge">
+
           <span className="live-dot"></span>
+
           LIVE
+
         </div>
+
       </header>
 
       {!trip ? (
+
         <div className="no-trip-card">
-          <div className="big-icon">🚗</div>
 
-          <h1>Zaan Vahnak Kan Thawk Rih Lo</h1>
+          <div className="big-icon">
+            🚗
+          </div>
 
-          {trip?.trip_title && (
-  <h2 className="trip-route-title">
-    {trip.trip_title}
-  </h2>
-)}
+          <h1>
+            Zaan Vahnak Kan Thawk Rih Lo
+          </h1>
+
           <p>
-            The driver has not started a trip yet.
+            The driver has not started
+            a trip yet.
           </p>
+
         </div>
+
       ) : (
+
         <main className="public-content">
+
           <section className="trip-card">
 
+            {/* TRIP HEADER */}
+
             <div className="trip-heading">
+
               <div className="trip-heading-icon">
                 🗺️
               </div>
 
               <div>
-                <h1>YOUR TRIP</h1>
-                <p>Track the current trip</p>
+
+                <h1>
+                  YOUR TRIP
+                </h1>
+
+                {trip.trip_title && (
+                  <h2 className="trip-route-title">
+                    {trip.trip_title}
+                  </h2>
+                )}
+
+                <p>
+                  Track the current trip
+                </p>
+
               </div>
+
             </div>
 
+            {/* CURRENT STOP */}
+
             {currentStop && (
+
               <div className="public-stop current-stop">
 
                 <div className="stop-label green-label">
-                  {currentStop.status.toUpperCase()}
+
+                  {currentStop.status ===
+                  "arrived"
+                    ? "ARRIVED"
+                    : "CURRENT"}
+
                 </div>
 
                 <div className="stop-info">
@@ -305,22 +406,94 @@ function PublicView() {
                   </div>
 
                   <div>
+
                     <h2>
                       {currentStop.places?.name ||
                         "Current House"}
                     </h2>
 
                     <p>
-                      {currentStop.places?.address || ""}
+                      {currentStop.places?.address ||
+                        ""}
                     </p>
+
                   </div>
 
                 </div>
+
+                {/* AUTOMATIC ARRIVAL TIME */}
+
+                <div className="public-arrival-time">
+
+                  {currentStop.status ===
+                  "arrived" ? (
+
+                    <>
+
+                      <strong>
+                        ARRIVED
+                      </strong>
+
+                      {arrivalTime && (
+                        <span>
+                          {formatArrivalTime(
+                            arrivalTime
+                          )}
+                        </span>
+                      )}
+
+                    </>
+
+                  ) : hasEta ? (
+
+                    <>
+
+                      <strong>
+                        ESTIMATED ARRIVAL
+                      </strong>
+
+                      <span>
+                        {formatArrivalTime(
+                          arrivalTime
+                        )}
+
+                        {" · about "}
+
+                        {etaMinutes}
+
+                        {" min"}
+                      </span>
+
+                    </>
+
+                  ) : (
+
+                    <>
+
+                      <strong>
+                        ARRIVAL TIME
+                      </strong>
+
+                      <span>
+                        Waiting for ETA update
+                      </span>
+
+                    </>
+
+                  )}
+
+                </div>
+
               </div>
+
             )}
 
+            {/* NEXT STOP */}
+
             {nextStop && (
+
               <>
+
                 <div className="down-arrow">
                   ⌄
                 </div>
@@ -338,22 +511,31 @@ function PublicView() {
                     </div>
 
                     <div>
+
                       <h2>
                         {nextStop.places?.name ||
                           "Next House"}
                       </h2>
 
                       <p>
-                        {nextStop.places?.address || ""}
+                        {nextStop.places?.address ||
+                          ""}
                       </p>
+
                     </div>
 
                   </div>
+
                 </div>
+
               </>
+
             )}
 
+            {/* PUBLIC MESSAGE */}
+
             {notification && (
+
               <div className="public-message">
 
                 <div className="message-icon">
@@ -361,6 +543,7 @@ function PublicView() {
                 </div>
 
                 <div>
+
                   <h3>
                     {notification.title}
                   </h3>
@@ -371,16 +554,21 @@ function PublicView() {
 
                   {notification.address && (
                     <p className="message-address">
-                      📍 {notification.address}
+                      📍{" "}
+                      {notification.address}
                     </p>
                   )}
+
                 </div>
 
               </div>
+
             )}
 
           </section>
+
         </main>
+
       )}
 
       <Link
@@ -389,9 +577,11 @@ function PublicView() {
       >
         ← HOME
       </Link>
+
     </div>
   );
 }
+
 
 /* =========================================================
    ADMIN
