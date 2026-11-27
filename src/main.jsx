@@ -427,8 +427,9 @@ const estimatedArrival =
   : displayStop.status === "arrived"
   ? "Atu Bak Nan Inn Kan Phan"
   : displayStop.status === "completed"
-  ? "An In Atu Bak Kan Dih A Si "
-  : "CURRENT"}
+  ? " Atu Bak Mah Inn Hi Kan Dih A Si "
+  : " Zaan Vak Kan Thawk Rih Lo
+   Nan Mah Inn In Kan Thawk Te Lai"}
 
                 </div>
 
@@ -462,7 +463,7 @@ const estimatedArrival =
                     <>
 
                       <strong>
-                        ARRIVED
+                        Kan Phan Cang
                       </strong>
 
                       {arrivalTime && (
@@ -480,7 +481,7 @@ const estimatedArrival =
                     <>
 
                       <strong>
-                        ESTIMATED ARRIVAL
+                        Atang Nazi Caan Ah Hin Nan In Kan Phan Te Lai
                       </strong>
 
                       <span>
@@ -502,7 +503,7 @@ const estimatedArrival =
                     <>
 
                       <strong>
-                        Nan Inn Kan Phanh Lai Caan Cu
+                        Nan Inn Kan Phanh Lai Caan Nazi Cu
                       </strong>
 
                       <span>
@@ -532,7 +533,7 @@ const estimatedArrival =
                 <div className="public-stop next-stop">
 
                   <div className="stop-label blue-label">
-                    NEXT
+                    NEXT, Nan Inn Ah Kan Ra Lai
                   </div>
 
                   <div className="stop-info">
@@ -1897,7 +1898,6 @@ src="https://raw.githubusercontent.com/nominationupa25-commits/Nan-Sinah-Kan-Ra-
                   <div className="house-icon">
                     🏠
                   </div>
-
                   <div>
 
                     <h2>
