@@ -1466,9 +1466,10 @@ src="https://raw.githubusercontent.com/nominationupa25-commits/Nan-Sinah-Kan-Ra-
   className="edit-trip-button"
   type="button"
   onClick={() => {
-    setEditingTrip(true);
+  setEditingTrip(true);
+  setPage("trip-plans");
 
-    setEditSelectedPlaces(
+  setEditSelectedPlaces(
       stops
         .filter(
           (stop) =>
