@@ -428,8 +428,7 @@ const estimatedArrival =
   ? "Atu Bak Nan Inn Kan Phan"
   : displayStop.status === "completed"
   ? " Atu Bak Mah Inn Hi Kan Dih A Si "
-  : " Zaan Vak Kan Thawk Rih Lo
-   Nan Mah Inn In Kan Thawk Te Lai"}
+  : " Zaan Vak Kan Thawk Rih Lo, Nan Mah Inn In Kan Thawk Te Lai"}
 
                 </div>
 
