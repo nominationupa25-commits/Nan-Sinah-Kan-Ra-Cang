@@ -397,7 +397,7 @@ const estimatedArrival =
               <div>
 
                 <h1>
-                  YOUR TRIP
+                  Christmas Zaan Vahnak Inn
                 </h1>
 
                 {trip.trip_title && (
@@ -407,7 +407,7 @@ const estimatedArrival =
                 )}
 
                 <p>
-                  Track the current trip
+                  Atang Lei Hi Kan Umnak Le Kan Kal Nak Ding Inn An Si Hna
                 </p>
 
               </div>
@@ -423,11 +423,11 @@ const estimatedArrival =
                 <div className="stop-label green-label">
 
                   {displayStop.status === "coming"
-  ? "COMING"
+  ? "Nan Inn Ah Kan Ra Lio Cang"
   : displayStop.status === "arrived"
-  ? "ARRIVED"
+  ? "Atu Bak Nan Inn Kan Phan"
   : displayStop.status === "completed"
-  ? "COMPLETED NOW"
+  ? "An In Atu Bak Kan Dih A Si "
   : "CURRENT"}
 
                 </div>
@@ -502,11 +502,11 @@ const estimatedArrival =
                     <>
 
                       <strong>
-                        ARRIVAL TIME
+                        Nan Inn Kan Phanh Lai Caan Cu
                       </strong>
 
                       <span>
-                        Waiting for ETA update
+                      ka hin kan rak langhter te lai
                       </span>
 
                     </>
