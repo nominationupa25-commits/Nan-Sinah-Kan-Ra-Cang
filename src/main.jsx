@@ -256,10 +256,10 @@ function PublicView() {
    * for the current stop.
    */
   const originalEtaMinutes = Number(
-  currentStop?.eta_minutes
+  displayStop?.eta_minutes
 );
 
-const etaStartedAt = currentStop?.eta_started_at
+const etaStartedAt = displayStop?.eta_started_at
   ? new Date(currentStop.eta_started_at).getTime()
   : null;
 
@@ -290,10 +290,10 @@ const estimatedArrival =
     : null;
 
   const arrivedTime =
-    currentStop?.status === "arrived" &&
-    currentStop?.updated_at
+    displayStop?.status === "arrived"&&
+    displayStop?.updated_at
       ? new Date(
-          currentStop.updated_at
+          displayStop?.updated_at
         )
       : null;
 
@@ -405,16 +405,19 @@ const estimatedArrival =
 
             {/* CURRENT STOP */}
 
-            {currentStop && (
+            {displayStop && (
 
               <div className="public-stop current-stop">
 
                 <div className="stop-label green-label">
 
-                  {currentStop.status ===
-                  "arrived"
-                    ? "ARRIVED"
-                    : "CURRENT"}
+                  {displayStop.status === "coming"
+  ? "COMING"
+  : displayStop.status === "arrived"
+  ? "ARRIVED"
+  : displayStop.status === "completed"
+  ? "COMPLETED NOW"
+  : "CURRENT"}
 
                 </div>
 
@@ -427,12 +430,12 @@ const estimatedArrival =
                   <div>
 
                     <h2>
-                      {currentStop.places?.name ||
+                      {displayStop.places?.name||
                         "Current House"}
                     </h2>
 
                     <p>
-                      {currentStop.places?.address ||
+                      {displayStop.places?.address ||
                         ""}
                     </p>
 
@@ -443,10 +446,8 @@ const estimatedArrival =
                 {/* AUTOMATIC ARRIVAL TIME */}
 
                 <div className="public-arrival-time">
-
-                  {currentStop.status ===
+                 {displayStop.status ===
                   "arrived" ? (
-
                     <>
 
                       <strong>
@@ -463,7 +464,7 @@ const estimatedArrival =
 
                     </>
 
-                  ) : hasEta ? (
+                  ) : displayStop.status === "coming" && hasEta ? (
 
                     <>
 
@@ -970,14 +971,25 @@ const [editSelectedPlaces, setEditSelectedPlaces] = useState([]);
       return;
     }
 
-    const current =
-      stops.find((stop) =>
-        [
-          "current",
-          "coming",
-          "arrived",
-        ].includes(stop.status)
-      ) || stops[0];
+    let current =
+  stops.find((stop) =>
+    [
+      "current",
+      "coming",
+      "arrived",
+    ].includes(stop.status)
+  );
+
+// If the previous stop was completed,
+// COMING should select the NEXT stop.
+if (!current) {
+  current =
+    stops.find((stop) =>
+      ["next", "pending"].includes(
+        stop.status
+      )
+    );
+}
 
     if (!current) {
       alert("There is no current stop.");
@@ -986,75 +998,71 @@ const [editSelectedPlaces, setEditSelectedPlaces] = useState([]);
 
     setSaving(true);
 
-    /* DONE */
+      /* DONE */
 
-    if (status === "done") {
+if (status === "done") {
 
-      const { error: stopError } =
-        await supabase
-          .from("trip_stops")
-          .update({
-            status: "completed",
-            completed_at:
-              new Date().toISOString(),
-          })
-          .eq("id", current.id);
+  const { error: stopError } =
+    await supabase
+      .from("trip_stops")
+      .update({
+        status: "completed",
+        completed_at:
+          new Date().toISOString(),
+      })
+      .eq("id", current.id);
 
-      if (stopError) {
+  if (stopError) {
 
-        setSaving(false);
+    setSaving(false);
 
-        alert(stopError.message);
+    alert(stopError.message);
 
-        return;
-      }
+    return;
+  }
 
-      const next =
-        stops.find((stop) =>
-          [
-            "next",
-            "pending",
-          ].includes(stop.status)
-        );
+  // Do NOT make the next stop CURRENT yet.
+  // The next stop stays NEXT until COMING is pressed.
 
-      if (next) {
+  const next =
+    stops.find((stop) =>
+      ["next", "pending"].includes(
+        stop.status
+      )
+    );
 
-        await supabase
-          .from("trip_stops")
-          .update({
-            status: "current",
-          })
-          .eq("id", next.id);
+  if (next) {
 
-        await supabase
-          .from("trips")
-          .update({
-            status: "active",
-            is_public_active: true,
-          })
-          .eq("id", trip.id);
+    await supabase
+      .from("trips")
+      .update({
+        status: "active",
+        is_public_active: true,
+      })
+      .eq("id", trip.id);
 
-      } else {
+  } else {
 
-        await supabase
-          .from("trips")
-          .update({
-            status: "completed",
-            is_public_active: false,
-            completed_at:
-              new Date().toISOString(),
-          })
-          .eq("id", trip.id);
-      }
+    await supabase
+      .from("trips")
+      .update({
+        status: "completed",
+        is_public_active: false,
+        completed_at:
+          new Date().toISOString(),
+      })
+      .eq("id", trip.id);
+  }
 
-      setSaving(false);
+  setSaving(false);
 
-      await loadData();
+  await loadData();
 
-      setPage("current-trip");
+  setPage("current-trip");
 
-      return;
-    }
+  return;
+}
+
 
     /* COMING / ARRIVED */
 
@@ -1202,27 +1210,34 @@ if (status === "coming") {
      CURRENT / NEXT / FINAL
   ======================================================= */
 
-  const currentStop =
-    stops.find((stop) =>
-      [
-        "current",
-        "coming",
-        "arrived",
-      ].includes(stop.status)
-    ) || null;
+  const currentStop = stops.find((stop) =>
+  ["current", "coming", "arrived"].includes(
+    stop.status
+  )
+);
 
-  const nextStop =
-    stops.find((stop) =>
-      [
-        "next",
-        "pending",
-      ].includes(stop.status)
-    ) || null;
+const completedStop = stops
+  .filter(
+    (stop) =>
+      stop.status === "completed"
+  )
+  .sort(
+    (a, b) =>
+      Number(b.stop_order) -
+      Number(a.stop_order)
+  )[0];
 
-  const finalStop =
-    stops.length
-      ? stops[stops.length - 1]
-      : null;
+const nextStop = stops.find((stop) =>
+  ["next", "pending"].includes(
+    stop.status
+  )
+);
+
+// If there is no active current stop,
+// show the most recently completed stop.
+// This happens immediately after DONE.
+const displayStop =
+  currentStop || completedStop;
 
     /* =======================================================
      AUTOMATIC GPS / ETA TRACKING
