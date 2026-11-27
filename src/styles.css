@@ -1639,3 +1639,43 @@ a {
     font-size: 10px;
   }
 }
+
+.public-arrival-time {
+  margin-top: 18px;
+  padding: 14px 18px;
+  border-radius: 18px;
+  background: #eef7ff;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.public-arrival-time strong {
+  color: #0b459c;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.public-arrival-time span {
+  color: #102b55;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.trip-route-title {
+  margin: 4px 0 6px;
+  color: #0b459c;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+@media (max-width: 600px) {
+  .public-arrival-time span {
+    font-size: 19px;
+  }
+
+  .trip-route-title {
+    font-size: 20px;
+  }
+}
+
