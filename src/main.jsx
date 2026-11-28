@@ -2378,7 +2378,6 @@ src="https://raw.githubusercontent.com/nominationupa25-commits/Nan-Sinah-Kan-Ra-
         }}
       >
         💾 SAVE TRIP CHANGES
-      </button>
 
       <button
   className="start-button"
@@ -2545,7 +2544,7 @@ src="https://raw.githubusercontent.com/nominationupa25-commits/Nan-Sinah-Kan-Ra-
               </button>
 
             </form>
-
+            >
           </section>
 
         )}
@@ -2625,13 +2624,6 @@ src="https://raw.githubusercontent.com/nominationupa25-commits/Nan-Sinah-Kan-Ra-
               )}
 
             </div>
-
-            <button
-              className="start-button"
-              type="button"
-              onClick={startTrip}
-              disabled={saving}
-            >
               ▶ START TRIP
             </button>
 
