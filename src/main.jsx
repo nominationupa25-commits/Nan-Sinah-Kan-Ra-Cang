@@ -2389,7 +2389,7 @@ src="https://raw.githubusercontent.com/nominationupa25-commits/Nan-Sinah-Kan-Ra-
   💾 SAVE TRIP CHANGES
 </button>
 
-          </section>
+          </div>
 
         )}
 
@@ -2531,8 +2531,7 @@ src="https://raw.githubusercontent.com/nominationupa25-commits/Nan-Sinah-Kan-Ra-
               )}
 
             </div>
-              ▶ START TRIP
-            </button>
+              
 
           </section>
 
