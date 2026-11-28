@@ -2385,7 +2385,6 @@ src="https://raw.githubusercontent.com/nominationupa25-commits/Nan-Sinah-Kan-Ra-
   disabled={saving}
   onClick={async () => {
 
-    onClick={async () => {
   if (!trip || !supabase) return;
 
   setSaving(true);
@@ -2544,7 +2543,7 @@ src="https://raw.githubusercontent.com/nominationupa25-commits/Nan-Sinah-Kan-Ra-
               </button>
 
             </form>
-            >
+            
           </section>
 
         )}
